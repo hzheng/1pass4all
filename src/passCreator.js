@@ -2,6 +2,8 @@
  * A password generator inspired by SuperGenPass(http://supergenpass.com)
  */
 
+var app = {'name': "1Pass4All", 'version': "0.1"};
+
 Function.prototype.bind = function(object, moreArguments) {
     var __method__ = this;
     var prependArgs = [];
@@ -334,6 +336,7 @@ var passCreator = {
         createElement('label', resultDiv, this.getMessage('label_result'));
         this._genPassField = createElement('input', resultDiv, null, 
                 this.settings.genpassStyle, {'disabled': "true"});
+        this._errorDiv = createElement('div', panel, null, this.settings.errorDivStyle);
     },
 
     _hide: function() {
@@ -345,7 +348,7 @@ var passCreator = {
     _genPass: function() {
         var domain = this._domainField.value;
         if (!domain) {
-            this.alert(this.getMessage('error_empty_domain'));
+            this.showError('error_empty_domain');
             return;
         }
         var pwd = domain + " ";
@@ -354,9 +357,11 @@ var passCreator = {
             pwd += user + " ";
         var masterPwd = this._masterPassField.value;
         if (!masterPwd) {
-            this.alert(this.getMessage('error_empty_pass'));
+            this.showError('error_empty_pass');
             return;
         }
+
+        this.hideError();
         pwd += masterPwd;
         this.log("password: " + pwd);
         this._genPassField.value = this.generate(pwd, this._passLen.value);
@@ -368,6 +373,16 @@ var passCreator = {
         this._resultDiv.style.display = "none";
     },
 
+    showError: function(msgId) {
+        this._resultDiv.style.display = "none";
+        this._errorDiv.innerHTML = this.getMessage(msgId);
+        this._errorDiv.style.display = "block";
+    },
+
+    hideError: function() {
+        this._errorDiv.style.display = "none";
+    },
+
     alert: function(msg) {
         alert(msg);
     },
@@ -377,7 +392,7 @@ var passCreator = {
     },
 
     settings: {
-        title: "1Pass4All 0.1",
+        title: app.name + " " + app.version,
         panelCss: "position: fixed; top: 2px; right: 2px; width: 320px; \
             z-index: 2147483647; background-color: #c9c9c9; \
             margin: auto; padding: 6px 2px; border: 2px outset; \
@@ -405,6 +420,8 @@ var passCreator = {
         resultDivStyle: {'width': "100%", 'display': "none"},
         genpassStyle: {'background': "transparent", 'color': "red",
             'border': "0", 'fontWeight': "bold"},
+        errorDivStyle: {'margin': "0 auto", 'width': "60%", 'font': "normal 10pt arial",
+            'color': "red", 'display': "none"},
         autoSubmit: true,
         alwaysShowPanel: false,
         passLen: 10,
@@ -485,4 +502,8 @@ var passCreator = {
     }
 };
 
+if (false) {
+    passCreator.settings.lang = 'zh';
+    passCreator.settings.alwaysShowPanel = true;
+}
 passCreator.start();
