@@ -107,7 +107,7 @@ var passCreator = {
 
     start: function() {
         try {
-            if (!this._autofill())
+            if (!this._autofill() || this.settings.alwaysShowPanel)
                 this._showPasswordPanel();
         } catch (e) {
             this.log(e.message);
@@ -208,7 +208,7 @@ var passCreator = {
         if (!pwd) {
             this.markField(pwdFld, true);
             pwdFld.focus();
-            throw {name: "PasswordError", message: "error_empty_password"};
+            throw {name: "PasswordError", message: "error_empty_pass"};
         } 
  
         this._pwdFlds = pwdFlds;
@@ -300,19 +300,19 @@ var passCreator = {
         var hideBtn = createElement('a', titleBar, "&times", this.settings.hideBtnStyle);
         hideBtn.onclick = this._hide.bind(this);
         clearFloat(titleBar);
-        createElement('label', panel, "Domain(*):");
+        createElement('label', panel, this.getMessage('label_domain'));
         this._domainField = createElement('input', panel, null, null,
                 {'value': this._domain || ""});
         clearFloat(panel);
-        createElement('label', panel, "Username:");
+        createElement('label', panel, this.getMessage('label_user'));
         this._userField = createElement('input', panel, null, null,
                 {'value': this._getUsername() || ""});
         clearFloat(panel);
-        createElement('label', panel, "Master password(*):");
+        createElement('label', panel, this.getMessage('label_master_pass'));
         this._masterPassField = createElement('input', panel, null, null,
                 {'type': "password"});
         clearFloat(panel);
-        createElement('label', panel, "Password length:");
+        createElement('label', panel, this.getMessage('label_pass_len'));
         var options = "";
         for (var i = 8; i < 21; ++i) {
             if (i == this.settings.passLen)
@@ -323,15 +323,16 @@ var passCreator = {
         this._passLen = createElement('select', panel, options);
         clearFloat(panel);
         var cmdDiv = createElement('div', panel, null, this.settings.cmdDivStyle);
-        var genBtn = createElement('button', cmdDiv, "Generate password",
+        var genBtn = createElement('button', cmdDiv, this.getMessage('cmd_gen_pass'),
                 this.settings.leftBtnStyle);
         genBtn.onclick = this._genPass.bind(this);
-        var clearBtn = createElement('button', cmdDiv, "Clear password",
+        var clearBtn = createElement('button', cmdDiv, this.getMessage('cmd_clear_pass'),
                 this.settings.rightBtnStyle);
         clearBtn.onclick = this._clearPass.bind(this);
         clearFloat(cmdDiv);
-        createElement('label', panel, "Result:");
-        this._genPassField = createElement('input', panel, null, 
+        var resultDiv = this._resultDiv = createElement('div', panel, null, this.settings.resultDivStyle);
+        createElement('label', resultDiv, this.getMessage('label_result'));
+        this._genPassField = createElement('input', resultDiv, null, 
                 this.settings.genpassStyle, {'disabled': "true"});
     },
 
@@ -344,7 +345,7 @@ var passCreator = {
     _genPass: function() {
         var domain = this._domainField.value;
         if (!domain) {
-            this.alert(this.getMessage("error_empty_domain"));
+            this.alert(this.getMessage('error_empty_domain'));
             return;
         }
         var pwd = domain + " ";
@@ -353,16 +354,18 @@ var passCreator = {
             pwd += user + " ";
         var masterPwd = this._masterPassField.value;
         if (!masterPwd) {
-            this.alert(this.getMessage("error_empty_password"));
+            this.alert(this.getMessage('error_empty_pass'));
             return;
         }
         pwd += masterPwd;
         this.log("password: " + pwd);
         this._genPassField.value = this.generate(pwd, this._passLen.value);
+        this._resultDiv.style.display = "block";
     },
 
     _clearPass: function() {
         this._genPassField.value = "";
+        this._resultDiv.style.display = "none";
     },
 
     alert: function(msg) {
@@ -399,9 +402,11 @@ var passCreator = {
         cmdDivStyle: {'width': "75%", 'margin': "8px auto"},
         leftBtnStyle: {'float': "left"},
         rightBtnStyle: {'float': "right"},
+        resultDivStyle: {'width': "100%", 'display': "none"},
         genpassStyle: {'background': "transparent", 'color': "red",
             'border': "0", 'fontWeight': "bold"},
         autoSubmit: true,
+        alwaysShowPanel: false,
         passLen: 10,
         lang: window.navigator.userLanguage || window.navigator.language
     },
@@ -415,6 +420,34 @@ var passCreator = {
     },
 
     _messages: {
+        'cmd_gen_pass': {
+            'en': "Generate password",
+            'zh': "生成密码"
+        },
+        'cmd_clear_pass': {
+            'en': "Clear password",
+            'zh': "清除密码"
+        },
+        'label_domain': {
+            'en': "Domain(*):",
+            'zh': "域名（*）："
+        },
+        'label_user': {
+            'en': "Username:",
+            'zh': "用户名："
+        },
+        'label_master_pass': {
+            'en': "Master password(*):",
+            'zh': "主密码（*）："
+        },
+        'label_pass_len': {
+            'en': "Password length:",
+            'zh': "密码长度："
+        },
+        'label_result': {
+            'en': "Acutual password:",
+            'zh': "实际密码："
+        },
         'error_no_domain': {
             'en': "No domain found",
             'zh': "未找到域名"
@@ -423,7 +456,7 @@ var passCreator = {
             'en': "Domain is empty",
             'zh': "域名为空"
         },
-        'error_empty_password': {
+        'error_empty_pass': {
             'en': "Password is empty",
             'zh': "密码为空"
         },
