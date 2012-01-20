@@ -3,6 +3,7 @@
  */
 
 var app = {'name': "1Pass4All", 'version': "0.1"};
+var debug = true;
 
 Function.prototype.bind = function(object, moreArguments) {
     var __method__ = this;
@@ -24,8 +25,8 @@ function isVisible(e) {
     if (e.offsetWidth === 0 || e.offsetHeight === 0) return false;
 
     while (e.nodeName.toLowerCase() != 'body'
-            && e.style.display.toLowerCase() != 'none' 
-            && e.style.visibility.toLowerCase() != 'hidden') {
+            && (!e.style.display || e.style.display.toLowerCase() != 'none')
+            && (!e.style.visibility || e.style.visibility.toLowerCase() != 'hidden')) {
         e = e.parentNode;
     }
     return e.nodeName.toLowerCase() == 'body';
@@ -91,20 +92,21 @@ var passCreator = {
 
     generate: function(basePwd, len) {
         if (!len)
-            len = this.settings.passLen;
-        else if (len < 8)
-            len = 8;
+            len = this.settings.defaultPassLen;
+        else if (len < this.settings.minPassLen)
+            len = this.settings.minPassLen;
         for (var retry = 0; ; ++retry) {
             basePwd = hasher.sha224In94(basePwd);
-            if (basePwd.length < Math.min(len, 20)) continue;
+            if (basePwd.length < Math.min(len, this.settings.maxPassLen))
+                continue;
             var pwd = basePwd.substring(0, len);
-            if (this.validate(pwd) || retry > 100)
+            if (this.validate(pwd) || retry > this.settings.validPassRetry)
                 return pwd;
         }
     },
 
     markField: function(field, error) {
-        field.style.background = error ? "red" : "#33FF66";
+        setStyles(field, this.settings[error ? "fldFailStyle" : "fldSucceedStyle"]);
     },
 
     start: function() {
@@ -112,17 +114,19 @@ var passCreator = {
             if (!this._autofill() || this.settings.alwaysShowPanel)
                 this._showPasswordPanel();
         } catch (e) {
-            this.log(e.message);
-            this.alert(this.getMessage(e.message));
+            var msg = this.getMessage(e.message) || e.message;
+            this.log(msg);
+            this.alert(msg);
         }
     },
 
     _autofill: function() {
         var domain = this._domain = getDomain();
         if (!domain) {
-            this._isLocal = location.href.indexOf("file://") == 0;
-            if (this._isLocal)
+            if (location.href.indexOf("file://") == 0) {
+                domain = this._domain = "file"; // local
                 this.settings.autoSubmit = false;
+            }
             else
                 throw {name: "DomainError", message: "error_no_domain"};
         }
@@ -315,14 +319,12 @@ var passCreator = {
                 {'type': "password"});
         clearFloat(panel);
         createElement('label', panel, this.getMessage('label_pass_len'));
-        var options = "";
-        for (var i = 8; i < 21; ++i) {
-            if (i == this.settings.passLen)
-                options += "<option selected='true' value='" + i + "'>" + i + "</option>";
-            else
-                options += "<option value='" + i + "'>" + i + "</option>";
+        var passLenSelect = this._passLenSelect = createElement('select', panel);
+        for (var i = this.settings.minPassLen; i <= this.settings.maxPassLen; ++i) {
+            var option = createElement('option', passLenSelect, i, null, {'value': i});
+            if (i == this.settings.defaultPassLen)
+                option.setAttribute('selected', "true");
         }
-        this._passLen = createElement('select', panel, options);
         clearFloat(panel);
         var cmdDiv = createElement('div', panel, null, this.settings.cmdDivStyle);
         var genBtn = createElement('button', cmdDiv, this.getMessage('cmd_gen_pass'),
@@ -364,7 +366,7 @@ var passCreator = {
         this.hideError();
         pwd += masterPwd;
         this.log("password: " + pwd);
-        this._genPassField.value = this.generate(pwd, this._passLen.value);
+        this._genPassField.value = this.generate(pwd, this._passLenSelect.value);
         this._resultDiv.style.display = "block";
     },
 
@@ -388,7 +390,7 @@ var passCreator = {
     },
 
     log: function(msg) {
-        console.log(msg);
+        if (debug) console.log(msg);
     },
 
     settings: {
@@ -422,9 +424,14 @@ var passCreator = {
             'border': "0", 'fontWeight': "bold"},
         errorDivStyle: {'margin': "0 auto", 'width': "60%", 'font': "normal 10pt arial",
             'color': "red", 'display': "none"},
+        fldSucceedStyle: {'background': "#33FF66"},
+        fldFailStyle: {'background': "red"},
         autoSubmit: true,
         alwaysShowPanel: false,
-        passLen: 10,
+        defaultPassLen: 10,
+        minPassLen: 8,
+        maxPassLen: 20,
+        validPassRetry: 100,
         lang: window.navigator.userLanguage || window.navigator.language
     },
 
@@ -502,7 +509,7 @@ var passCreator = {
     }
 };
 
-if (false) {
+if (debug) {
     passCreator.settings.lang = 'zh';
     passCreator.settings.alwaysShowPanel = true;
 }

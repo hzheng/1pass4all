@@ -11,7 +11,7 @@ all: $(INSTALL_HTM) $(BOOKMARK_URL)
 $(COMPILED_JS): $(SRC_JS)
 	@echo "compiling " $^
 	@mkdir -p $(BUILD_DIR)
-	java -jar $(LIB_DIR)/compiler.jar --js $^ --js_output_file $@
+	@sed 's/debug = true/debug=0/g' $^ | java -jar $(LIB_DIR)/compiler.jar --js_output_file $@
 
 $(INSTALL_HTM): $(COMPILED_JS)
 	@echo "generating installation page: " $@
