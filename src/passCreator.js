@@ -90,18 +90,31 @@ var passCreator = {
         return /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/.test(pwd);
     },
 
-    generate: function(basePwd, len) {
+    generate: function(basePwd, info, len, iteration, salt) {
+        this.log("pwd=" + basePwd + ";info=" + info + ";len=" + len
+                + ";iteration=" + iteration + ";salt=" + salt);
         if (!len)
             len = this.settings.defaultPassLen;
         else if (len < this.settings.minPassLen)
             len = this.settings.minPassLen;
+        else if (len > this.settings.maxPassLen)
+            len = this.settings.maxPassLen;
+        basePwd += (salt || this.settings.salt);
+        this.log("base pass: " + basePwd);
+
+        var pwd = "";
+        for (var i = (iteration || this.settings.iteration) - 1; i > 0; --i) {
+            this.log("prehash...");
+            pwd = hasher.hmacSha224In94(pwd + basePwd, info);
+        }
+
         for (var retry = 0; ; ++retry) {
-            basePwd = hasher.sha224In94(basePwd);
-            if (basePwd.length < Math.min(len, this.settings.maxPassLen))
-                continue;
-            var pwd = basePwd.substring(0, len);
-            if (this.validate(pwd) || retry > this.settings.validPassRetry)
-                return pwd;
+            pwd = hasher.hmacSha224In94(pwd + basePwd, info);
+            this.log("retry " + retry + '; pass len=' + pwd.length);
+            var subPwd = pwd.substring(0, len);
+            if ((retry > this.settings.validPassRetry)
+                    || (pwd.length >= len && this.validate(subPwd)))
+                return subPwd;
         }
     },
 
@@ -131,17 +144,12 @@ var passCreator = {
                 throw {name: "DomainError", message: "error_no_domain"};
         }
 
-        var pwd = this._checkPasswordFields();
-        if (!pwd) return;
+        var pwdValues = this._checkPasswordFields();
+        if (!pwdValues) return;
  
-        var passLen = 0; // default
-        var pwdGroups = /^(.*)( \d{1,2})$/.exec(pwd);
-        if (pwdGroups) {
-            pwd = pwdGroups[1];
-            passLen = parseInt(pwdGroups[2]);
-        }
-        pwd = domain + " " + pwd;
-        pwd = this.generate(pwd, passLen);
+        var pwd = this.generate(pwdValues.pass,
+                this._getInfo(domain, pwdValues.user),
+                pwdValues.passLen, pwdValues.iteration, pwdValues.salt);
         this._pwdFld.value = pwd;
         this.markField(this._pwdFld);
         if (this.settings.autoSubmit && this._form 
@@ -219,12 +227,20 @@ var passCreator = {
  
         this._pwdFlds = pwdFlds;
         this._pwdFld = pwdFld;
-        if (pwd[0] == " ") { // autodetect user
-            var user = this._findUsername();
-            if (user == null) return;
-            pwd = user + pwd;
+        return this._parsePwdValue(pwd);
+    },
+
+    _parsePwdValue: function(pwd) {
+        var groups = /^(([^ ]*) +)?([^ ]{6,})( +(\d{1,2}))?( +\*(\d+))?( +\+([^ ]+))?( +!([^ ]*))?$/.exec(pwd);
+        if (!groups)
+            throw {name: "SyntaxError", message: "error_pass_syntax"};
+
+        var user = groups[1] ? groups[2] : null;
+        if (user == "") { // autodetect user
+            user = this._findUsername();
         }
-        return pwd;
+        return {'user': user, 'pass': groups[3], 'passLen': groups[5],
+                'iteration': groups[7], 'salt': groups[9], 'cmd': groups[11]};
     },
 
     _getUsername: function() {
@@ -303,8 +319,11 @@ var passCreator = {
         var titleBar = createElement('div', panel, null, this.settings.titleBarStyle);
         // add title text and close button
         createElement('span', titleBar, this.settings.title, this.settings.titleStyle);
-        var hideBtn = createElement('a', titleBar, "&times", this.settings.hideBtnStyle);
+        var hideBtn = createElement('a', titleBar, "&times", this.settings.topBtnStyle);
         hideBtn.onclick = this._hide.bind(this);
+        var moreBtn = this._moreBtn
+            = createElement('a', titleBar, "+", this.settings.topBtnStyle);
+        moreBtn.onclick = this._toggleMore.bind(this);
         clearFloat(titleBar);
         createElement('label', panel, this.getMessage('label_domain'));
         this._domainField = createElement('input', panel, null, null,
@@ -326,6 +345,15 @@ var passCreator = {
                 option.setAttribute('selected', "true");
         }
         clearFloat(panel);
+        var advancedDiv = this._advancedDiv 
+            = createElement('div', panel, null, this.settings.advancedDivStyle); 
+        createElement('label', advancedDiv, this.getMessage('label_iteration'));
+        this._iterationField = createElement('input', advancedDiv, null, null,
+                {value: this.settings.iteration});
+        createElement('label', advancedDiv, this.getMessage('label_salt'));
+        this._saltField = createElement('input', advancedDiv, null, null,
+                {value: this.settings.salt});
+
         var cmdDiv = createElement('div', panel, null, this.settings.cmdDivStyle);
         var genBtn = createElement('button', cmdDiv, this.getMessage('cmd_gen_pass'),
                 this.settings.leftBtnStyle);
@@ -341,6 +369,17 @@ var passCreator = {
         this._errorDiv = createElement('div', panel, null, this.settings.errorDivStyle);
     },
 
+    _toggleMore: function() {
+        var e = this._advancedDiv;
+        if (e.style.display == "none") {
+            e.style.display = "block";
+            this._moreBtn.innerHTML = "-";
+        } else {
+            e.style.display = "none";
+            this._moreBtn.innerHTML = "+";
+        }
+    },
+
     _hide: function() {
         if (this._panel) {
             this._panel.style.display = "none";
@@ -353,21 +392,31 @@ var passCreator = {
             this.showError('error_empty_domain');
             return;
         }
-        var pwd = domain + " ";
-        var user = this._userField.value;
-        if (user)
-            pwd += user + " ";
         var masterPwd = this._masterPassField.value;
-        if (!masterPwd) {
-            this.showError('error_empty_pass');
+        if (masterPwd.length < 6) {
+            this.showError('error_masterpass_too_short');
+            return;
+        }
+        var iteration = this._iterationField.value;
+        if (isNaN(iteration)) {
+            this.showError('error_iteration_not_number');
             return;
         }
 
         this.hideError();
-        pwd += masterPwd;
-        this.log("password: " + pwd);
-        this._genPassField.value = this.generate(pwd, this._passLenSelect.value);
+        this._genPassField.value = this.generate(masterPwd,
+                this._getInfo(domain, this._userField.value),
+                this._passLenSelect.value, parseInt(iteration), this._saltField.value);
         this._resultDiv.style.display = "block";
+    },
+
+    _getInfo: function (domain, user, otherArgs) {
+        var info = "";
+        for (var i = 0; i < arguments.length; ++i) {
+            info += arguments[i] || "";
+        }
+        this.log("info: " + info);
+        return hasher.sha224In94(info);
     },
 
     _clearPass: function() {
@@ -401,10 +450,10 @@ var passCreator = {
             -moz-border-radius: 10px; -webkit-border-radius: 10px; \
             border-radius: 10px; -khtml-border-radius: 10px; \
             opacity: 0.8",
-        labelCss: "float: left; width: 45%; margin-right: 6px; \
+        labelCss: "float: left; width: 40%; margin-right: 6px; \
             padding-top: 2px; text-align: right; \
             font: normal 10pt arial,verdana,sans-serif",
-        inputCss: "width: 50%; margin: 3px 2px;",
+        inputCss: "width: 55%; margin: 3px 2px;",
         buttonCss: "background: #7182A4; color: #FFFFFF; \
             margin: 2px; border: 1px outset silver",
         titleBarStyle: {'width': "100%", 
@@ -413,9 +462,10 @@ var passCreator = {
             'marginBottom': "6px", 'padding': "0"},
         titleStyle: {'width': "70%", 'padding': "1px 2px",
             'font': "bold 12pt serif"},
-        hideBtnStyle: {'float': "right", 'cursor': "pointer",
+        topBtnStyle: {'float': "right", 'cursor': "pointer",
             'padding': "1px 6px",
             'color': "#5B657A", 'font': "normal 14px tahoma,arial,sans-serif"},
+        advancedDivStyle: {'width': "100%", 'display': "none"},
         cmdDivStyle: {'width': "75%", 'margin': "8px auto"},
         leftBtnStyle: {'float': "left"},
         rightBtnStyle: {'float': "right"},
@@ -428,10 +478,12 @@ var passCreator = {
         fldFailStyle: {'background': "red"},
         autoSubmit: true,
         alwaysShowPanel: false,
-        defaultPassLen: 10,
-        minPassLen: 8,
-        maxPassLen: 20,
+        defaultPassLen: 12,
+        minPassLen: 6,
+        maxPassLen: 26,
         validPassRetry: 100,
+        iteration: 999,
+        salt: "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO",
         lang: window.navigator.userLanguage || window.navigator.language
     },
 
@@ -468,6 +520,14 @@ var passCreator = {
             'en': "Password length:",
             'zh': "密码长度："
         },
+        'label_iteration': {
+            'en': "Iteration:",
+            'zh': "迭代次数："
+        },
+        'label_salt': {
+            'en': "Salt:",
+            'zh': "盐（salt）："
+        },
         'label_result': {
             'en': "Acutual password:",
             'zh': "实际密码："
@@ -484,9 +544,30 @@ var passCreator = {
             'en': "Password is empty",
             'zh': "密码为空"
         },
+        'error_masterpass_too_short': {
+            'en': "Master password is too short(less than 6)",
+            'zh': "主密码过短（小于6位）"
+        },
         'error_empty_user': {
             'en': "User field is empty",
             'zh': "用户名为空"
+        },
+        'error_iteration_not_number': {
+            'en': "Iteration is not a number",
+            'zh': "迭代次数应为数字"
+        },
+        'error_pass_syntax': {
+            'en': "Password format error. \n" +
+                "The correct format is(bracketed terms are optional):\n" +
+                "[user ]master_password[ pass_len][ *iteration][ +salt]\n\n" +
+                "where master_password's length is at least six,\n" +
+                "pass_len is a positive integer less than 100,\n" +
+                "iteration is a positive integer.",
+            'zh': "密码格式错误。正确格式为（[]内为可选项）：\n" +
+                "[user ]master_password[ pass_len][ *iteration][ +salt]\n\n" +
+                "其中主密码master_password长度不小于6位\n" +
+                "密码长度pass_len是一个小于100的正整数,\n" +
+                "迭代次数iteration是一个正整数。",
         },
         'error_detect_user_with_multipwd': {
             'en': 
