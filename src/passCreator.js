@@ -111,7 +111,7 @@ var passCreator = {
 
         for (var retry = 0; ; ++retry) {
             pwd = hasher.hmacSha224In94(pwd + basePwd, info);
-            this.log("retry " + retry + "; pass len=" + pwd.length);
+            this.log("retry " + retry + "; generated pass len=" + pwd.length);
             var subPwd = pwd.substring(0, len);
             if ((retry > this.VALID_PASS_RETRY)
                     || (pwd.length >= len && this.validate(subPwd)))
@@ -125,8 +125,9 @@ var passCreator = {
 
     start: function() {
         try {
-            if (!this._autofill() || this.settings.alwaysShowPanel)
-                this._showPasswordPanel();
+            var result = this._autofill();
+            if (!result[0]) // no auto-submit
+                this._showPasswordPanel(result[1]);
         } catch (e) {
             var msg = this.getMessage(e.message) || e.message;
             this.log(msg);
@@ -136,29 +137,32 @@ var passCreator = {
 
     _autofill: function() {
         var domain = this._domain = getDomain();
+        var autoSubmit = this.settings.autoSubmit && this._form
+            && (this._pwdFlds.length == 1);
         if (!domain) {
             if (location.href.indexOf("file://") == 0) {
                 domain = this._domain = "file"; // local
-                this.settings.autoSubmit = false;
+                autoSubmit = false;
             }
             else
                 throw {name: "DomainError", message: "error_no_domain"};
         }
 
         var pwdValues = this._checkPasswordFields();
-        if (!pwdValues) return;
+        if (!pwdValues) return [false, null];
  
         var pwd = this.generate(pwdValues.pass,
                 this._getInfo(domain, pwdValues.user),
                 pwdValues.passLen, pwdValues.iteration, pwdValues.salt);
         this._pwdFld.value = pwd;
         this.markField(this._pwdFld);
-        if (this.settings.autoSubmit && this._form 
-                && (this._pwdFlds.length == 1)) {
+        var cmd = pwdValues.cmd;
+        autoSubmit &= (cmd == null); // currently, any cmd means no-autoSubmit
+        if (autoSubmit) {
             this.log("submitting");
             this._form.submit();
         }
-        return true;
+        return [autoSubmit, pwdValues];
     },
 
     _getDocument: function(doc) {
@@ -298,16 +302,16 @@ var passCreator = {
     },
 
     /** Show form */
-    _showPasswordPanel: function() {
+    _showPasswordPanel: function(pwdValues) {
         var panel = document.getElementById(this.PANEL_ID);
         if (panel) {
             panel.style.display = "block";
         } else {
-            this._createPasswordPanel();
+            this._createPasswordPanel(pwdValues);
         }
     },
 
-    _createPasswordPanel: function() {
+    _createPasswordPanel: function(pwdValues) {
         var cssText = "#" + this.PANEL_ID + " {" + this.settings.panelCss + "}";
         cssText += "#" + this.PANEL_ID + " label{" + this.settings.labelCss + "}";
         cssText += "#" + this.PANEL_ID + " input{" + this.settings.inputCss + "}";
@@ -330,17 +334,18 @@ var passCreator = {
         clearFloat(panel);
         createElement('label', panel, this.getMessage('label_user'));
         this._userField = createElement('input', panel, null, null,
-                {value: this._getUsername() || ""});
+                {value: pwdValues && pwdValues.user || ""});
         clearFloat(panel);
         createElement('label', panel, this.getMessage('label_master_pass'));
         this._masterPassField = createElement('input', panel, null, null,
-                {type: "password"});
+                {type: "password", value: pwdValues && pwdValues.pass || ""});
         clearFloat(panel);
         createElement('label', panel, this.getMessage('label_pass_len'));
         var passLenSelect = this._passLenSelect = createElement('select', panel);
+        var passLen = pwdValues && pwdValues.passLen || this.settings.passLen;
         for (var i = this.MIN_PASS_LEN; i <= this.MAX_PASS_LEN; ++i) {
             var option = createElement('option', passLenSelect, i, null, {value: i});
-            if (i == this.settings.defaultPassLen)
+            if (i == passLen)
                 option.setAttribute('selected', "true");
         }
         clearFloat(panel);
@@ -348,10 +353,10 @@ var passCreator = {
             = createElement('div', panel, null, this.settings.advancedDivStyle); 
         createElement('label', advancedDiv, this.getMessage('label_iteration'));
         this._iterationField = createElement('input', advancedDiv, null, null,
-                {value: this.settings.iteration});
+                {value: pwdValues && pwdValues.iteration || this.settings.iteration});
         createElement('label', advancedDiv, this.getMessage('label_salt'));
         this._saltField = createElement('input', advancedDiv, null, null,
-                {value: this.settings.salt});
+                {value: pwdValues && pwdValues.salt || this.settings.salt});
 
         var cmdDiv = createElement('div', panel, null, this.settings.cmdDivStyle);
         var genBtn = createElement('button', cmdDiv, this.getMessage('cmd_gen_pass'),
@@ -491,7 +496,6 @@ var passCreator = {
         fldSucceedStyle: {background: "#33FF66"},
         fldFailStyle: {background: "red"},
         autoSubmit: true,
-        alwaysShowPanel: false,
         defaultPassLen: 12,
         iteration: 999,
         salt: "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO",
@@ -596,6 +600,5 @@ var passCreator = {
 
 if (debug) {
     passCreator.settings.lang = 'zh';
-    passCreator.settings.alwaysShowPanel = true;
 }
 passCreator.start();

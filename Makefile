@@ -9,7 +9,7 @@ BOOKMARK_URL = $(BUILD_DIR)/bookmark.url
 all: $(INSTALL_HTM) $(BOOKMARK_URL)
 
 $(COMPILED_JS): $(SRC_JS)
-	@echo "compiling " $^
+	@echo "compiling " $^ to $@
 	@mkdir -p $(BUILD_DIR)
 	@sed 's/debug = true/debug=0/g' $^ | java -jar $(LIB_DIR)/compiler.jar --js_output_file $@
 
