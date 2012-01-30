@@ -83,12 +83,16 @@ function getDomain(url) {
 // password syntax
 var PASS_SYNTAX = "[user ]master_password[ pass_len][ *iteration][ +salt]"; 
 var PASS_REGEX = /^(([^ ]*) +)?([^ ]{6,})( +(\d{1,2}))?( +\*(\d+))?( +\+([^ ]+))?( +!([^ ]*))?$/;
+var MIN_PASS_LEN = 8;
+var MAX_PASS_LEN = 26;
+var VALID_PWD_PATTERN = new RegExp("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{" 
+        + MIN_PASS_LEN + "," + MAX_PASS_LEN + "}$");
 
 // password generator
 var passCreator = {
     validate: function(pwd) {
         this.log("validating password " + pwd);
-        return /(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}/.test(pwd);
+        return VALID_PWD_PATTERN.test(pwd);
     },
 
     generate: function(basePwd, info, len, iteration, salt) {
@@ -96,10 +100,10 @@ var passCreator = {
                 + ";iteration=" + iteration + ";salt=" + salt);
         if (!len)
             len = this.settings.defaultPassLen;
-        else if (len < this.MIN_PASS_LEN)
-            len = this.MIN_PASS_LEN;
-        else if (len > this.MAX_PASS_LEN)
-            len = this.MAX_PASS_LEN;
+        if (len < MIN_PASS_LEN)
+            len = MIN_PASS_LEN;
+        else if (len > MAX_PASS_LEN)
+            len = MAX_PASS_LEN;
         basePwd += (salt || this.settings.salt);
         this.log("base pass: " + basePwd);
 
@@ -342,8 +346,8 @@ var passCreator = {
         clearFloat(panel);
         createElement('label', panel, this.getMessage('label_pass_len'));
         var passLenSelect = this._passLenSelect = createElement('select', panel);
-        var passLen = pwdValues && pwdValues.passLen || this.settings.passLen;
-        for (var i = this.MIN_PASS_LEN; i <= this.MAX_PASS_LEN; ++i) {
+        var passLen = pwdValues && pwdValues.passLen || this.settings.defaultPassLen;
+        for (var i = MIN_PASS_LEN; i <= MAX_PASS_LEN; ++i) {
             var option = createElement('option', passLenSelect, i, null, {value: i});
             if (i == passLen)
                 option.setAttribute('selected', "true");
@@ -456,8 +460,6 @@ var passCreator = {
 
     // constants
     PANEL_ID: "_1pass4all",
-    MIN_PASS_LEN: 6,
-    MAX_PASS_LEN: 26,
     VALID_PASS_RETRY: 100,
 
     // customizable settings
@@ -568,7 +570,7 @@ var passCreator = {
             en: "Password format error. \n" +
                 "The correct format is(bracketed terms are optional):\n" +
                 PASS_SYNTAX + "\n\n" +
-                "where master_password's length is at least six,\n" +
+                "where the length of master_password is at least six,\n" +
                 "pass_len is a positive integer less than 100,\n" +
                 "iteration is a positive integer.",
             zh: "密码格式错误。正确格式为（[]内为可选项）：\n" +
