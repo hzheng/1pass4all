@@ -1,0 +1,151 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" 
+"http://www.w3.org/TR/html4/loose.dtd">
+<html>
+    <head>
+        <script src="http://code.jquery.com/jquery-latest.js"></script>
+        <link rel="stylesheet" href="http://code.jquery.com/qunit/git/qunit.css" type="text/css" media="screen" />
+        <script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
+        <script type="text/javascript" src="../src/hasher.js"></script>
+        <script type="text/javascript" src="../src/passCreator.js"></script>
+
+        <script>
+            $(document).ready(function(){
+                // SHA tests
+                module("SHA");
+                test("sha256 test", 4, function() {
+                    equal(hasher.sha256InHex(""),
+                        "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+                        "empty string");
+                    equal(hasher.sha256InHex("message digest"),
+                        "f7846f55cf23e14eebeab5b4e1550cad5b509e3348fbc4efa3a1413d393cb650",
+                        "'message digest'");
+                    equal(hasher.sha256InHex("messagedigest"),
+                        "e5f0bf06957eba90051bfced251cbcfb084a2303e3752c2641e4dcb31d025dd9",
+                        "'mesagedigest'");
+                    equal(hasher.sha256InHex("The quick brown fox jumps over the lazy dog"),
+                        "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592",
+                        "'the quick brown...'");
+                });
+                test("sha224 test", 4, function() {
+                    equal(hasher.sha256InHex("", true),
+                        "d14a028c2a3a2bc9476102bb288234c415a2b01f828ea62ac5b3e42f",
+                        "empty string");
+                    equal(hasher.sha256InHex("message digest", true),
+                        "2cb21c83ae2f004de7e81c3c7019cbcb65b71ab656b22d6d0c39b8eb",
+                        "'message digest'");
+                    equal(hasher.sha256InHex("messagedigest", true),
+                        "d8693dd961c30523363b9d31a1c272a71af667f7275b09f483172d37",
+                        "'mesagedigest'");
+                    equal(hasher.sha256InHex("The quick brown fox jumps over the lazy dog", true),
+                        "730e109bd7a8a32b1cb9d9a09aa2325d2430587ddbc0c38bad911525",
+                        "'the quick brown...'");
+                });
+
+                // HMAC tests
+                module("HMAC");
+                var key64Byte = "This is a key that has exactly sixty-four bytes, the rest is pad";
+                var keyMoreThan64Byte = "This is a key that has more than sixty-four bytes, the rest is pad";
+                var keyLessThan64Byte = "This is a key that has less than sixty-four bytes";
+                var msgWith64byteKey = "this is a test message that is keyed with a 64-byte key";
+                var msgWithMoreThan64byteKey = "this is a test message that is keyed with a long key(> 64 bytes)";
+                var msgWithLessThan64byteKey = "this is a test message that is keyed with a short key(< 64 bytes)";
+
+                test("hmac input test", 3, function() {
+                    ok(keyLessThan64Byte.length < 64, "a string less than 64 byte");
+                    equal(key64Byte.length, 64, "64 byte string");
+                    ok(keyMoreThan64Byte.length > 64, "a string more than 64 byte");
+                });
+                test("hmac-sha256 test", 4, function() {
+                    equal(hasher.hmacSha256InHex("", ""),
+                        "b613679a0814d9ec772f95d778c35fc5ff1697c493715653c6c712144292c5ad",
+                        "empty key and message");
+                    equal(hasher.hmacSha256InHex(keyLessThan64Byte, msgWithLessThan64byteKey),
+                        "46e02c9378f1812016230e9e55e566ada47007e39d9c3703ce4778c19106c5e7",
+                        "a key less than 64 bytes");
+                    equal(hasher.hmacSha256InHex(key64Byte, msgWith64byteKey),
+                        "664ca980e69ce48147447df610dc9f2b152eeb7905dca7f040700223b3d1dc73",
+                        "a 64-byte key");
+                    equal(hasher.hmacSha256InHex(keyMoreThan64Byte, msgWithMoreThan64byteKey),
+                        "ced571f49df897d2b7c58f2f9dd7a4cdfe629dd09736ed69a88b9f45743c51a2",
+                        "a key more than 64 bytes");
+                });
+                test("hmac-sha224 test", 4, function() {
+                    equal(hasher.hmacSha256InHex("", "", true),
+                        "5ce14f72894662213e2748d2a6ba234b74263910cedde2f5a9271524",
+                        "empty key and message");
+                    equal(hasher.hmacSha256InHex(keyLessThan64Byte, msgWithLessThan64byteKey, true),
+                        "547fb90a472da936b19f41c43522f05f5bff8d4d8f27f2ffbeaab10d",
+                        "a key less than 64 bytes");
+                    equal(hasher.hmacSha256InHex(key64Byte, msgWith64byteKey, true),
+                        "947f1118de5621a291619cc8c740803a84f6ec1c3de9c9bfff3507f6",
+                        "a 64-byte key");
+                    equal(hasher.hmacSha256InHex(keyMoreThan64Byte, msgWithMoreThan64byteKey, true),
+                        "eab54fdc38af384c4690ae59d813c41d2533408dfaa29d2c668d9bb8",
+                        "a key more than 64 bytes");
+                });
+
+                // passCreator tests
+                module("passCreator");
+                test("domain test", 8, function() {
+                    equal(getDomain("mail.google.com"), "google", "gmail");
+                    equal(getDomain("yahoo.com"), "yahoo", "yahoo.com");
+                    equal(getDomain("yahoo.com.cn"), "yahoo", "yahoo.com.cn");
+                    equal(getDomain("wa.gov.au"), "wa", "domain of gov.au");
+                    equal(getDomain("liswa.wa.gov.au"), "liswa", "domain of wa.gov.au");
+                    equal(getDomain("henrietta.liswa.wa.gov.au"), "liswa", "domain(with subdomain) of wa.gov.au");
+                    equal(getDomain("henrietta.liswa.wb.gov.au"), "wb", "domain of gov.au");
+                    equal(getDomain("sudomain.abc.政府.hk"), "abc", "Chinese domain");
+                });
+                test("password-syntax test", 9, function() {
+                    deepEqual(passCreator.parsePwdValue("masterpass"),
+                    {user: null, pass: "masterpass", passLen: undefined,
+                        iteration: undefined, salt: undefined, cmd: undefined}, "simplest password");
+                    deepEqual(passCreator.parsePwdValue("login masterpass"),
+                    {user: "login", pass: "masterpass", passLen: undefined,
+                        iteration: undefined, salt: undefined, cmd: undefined}, "password with user");
+                    deepEqual(passCreator.parsePwdValue("login masterpass 20"),
+                    {user: "login", pass: "masterpass", passLen: "20",
+                        iteration: undefined, salt: undefined, cmd: undefined}, "normal password");
+                    deepEqual(passCreator.parsePwdValue("login masterpass 20 *100"),
+                    {user: "login", pass: "masterpass", passLen: "20",
+                        iteration: "100", salt: undefined, cmd: undefined}, "password without salt and cmd");
+                    deepEqual(passCreator.parsePwdValue("login masterpass 20 *100 +salt"),
+                    {user: "login", pass: "masterpass", passLen: "20",
+                        iteration: "100", salt: "salt", cmd: undefined}, "password without cmd");
+                    deepEqual(passCreator.parsePwdValue("login masterpass 20 *100 +salt !command"),
+                    {user: "login", pass: "masterpass", passLen: "20",
+                        iteration: "100", salt: "salt", cmd: "command"}, "full password");
+                    raises(function() {passCreator.parsePwdValue("login pass");},
+                        function(e) {return e.name == "SyntaxError";},
+                        "invalid password: password too short");
+                    raises(function() {passCreator.parsePwdValue("login masterpass 100");},
+                        function(e) {return e.name == "SyntaxError";},
+                        "invalid password: passLen too large");
+                    raises(function() {passCreator.parsePwdValue("login masterpass *1a");},
+                        function(e) {return e.name == "SyntaxError";},
+                        "invalid password: iteration non-digit");
+                });
+                test("password-generation test", 3, function() {
+                    equal(passCreator.generate("abc123", "file", 12, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+                        "=v1r6k7#!D\\<", "password(local)");
+                    equal(passCreator.generate("abc123", "fileloginname", 25, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+                        "rqgu0R~j*K2tTeWx;J_47%4zy", "password with login(local)");
+                    equal(passCreator.generate("password", "googleuser", 20, 499, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+                        "f&x[#&h@Ocx\"]LZ<Mx7e", "password with login(on google)");
+                });
+            });
+        </script>
+
+    </head>
+    <body>
+        <h1 id="qunit-header">1pass4all test</h1>
+        <h2 id="qunit-banner"></h2>
+        <div id="qunit-testrunner-toolbar"></div>
+        <h2 id="qunit-userAgent"></h2>
+        <ol id="qunit-tests"></ol>
+        <div id="qunit-fixture">test markup, will be hidden</div>
+
+        <div style="margin-top: 30px"><a href="test.html">back to test</a></div>
+    </body>
+</html>
+

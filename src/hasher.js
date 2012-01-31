@@ -1,7 +1,10 @@
 /**
  *  Secure hash functions(currently support SHA256 and SHA224)
+ *  and HMAC(currently support HMAC-SHA256 and HMAC-SHA224)
  *
- * Reference: http://en.wikipedia.org/wiki/SHA-2
+ * Reference:
+ * http://en.wikipedia.org/wiki/SHA-2
+ * http://en.wikipedia.org/wiki/HMAC
  */
 
 // utilities
@@ -27,7 +30,7 @@ function bin2hex(bin) {
     return hex;
 }
 
-/** Repack bit blocks from a larger unit to a small ones.
+/** Repack bit blocks from a larger unit to a small one.
  */
 function shortenBitBlock(bitBlocks, longBits, shortBits) {
     var result = [];

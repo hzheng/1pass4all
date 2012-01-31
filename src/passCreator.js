@@ -95,8 +95,8 @@ var passCreator = {
         return VALID_PWD_PATTERN.test(pwd);
     },
 
-    generate: function(basePwd, info, len, iteration, salt) {
-        this.log("pwd=" + basePwd + ";info=" + info + ";len=" + len
+    generate: function(masterPwd, info, len, iteration, salt) {
+        this.log("pwd=" + masterPwd + ";info=" + info + ";len=" + len
                 + ";iteration=" + iteration + ";salt=" + salt);
         if (!len)
             len = this.settings.defaultPassLen;
@@ -104,17 +104,18 @@ var passCreator = {
             len = MIN_PASS_LEN;
         else if (len > MAX_PASS_LEN)
             len = MAX_PASS_LEN;
-        basePwd += (salt || this.settings.salt);
-        this.log("base pass: " + basePwd);
+        masterPwd += (salt || this.settings.salt);
+        this.log("salted master pass: " + masterPwd);
+        info = hasher.sha224In94(info);
+        this.log("hashed info: " + info);
 
         var pwd = "";
         for (var i = (iteration || this.settings.iteration) - 1; i > 0; --i) {
             this.log("prehash...");
-            pwd = hasher.hmacSha224In94(pwd + basePwd, info);
+            pwd = hasher.hmacSha224In94(pwd + masterPwd, info);
         }
-
         for (var retry = 0; ; ++retry) {
-            pwd = hasher.hmacSha224In94(pwd + basePwd, info);
+            pwd = hasher.hmacSha224In94(pwd + masterPwd, info);
             this.log("retry " + retry + "; generated pass len=" + pwd.length);
             var subPwd = pwd.substring(0, len);
             if ((retry > this.VALID_PASS_RETRY)
@@ -236,10 +237,10 @@ var passCreator = {
  
         this._pwdFlds = pwdFlds;
         this._pwdFld = pwdFld;
-        return this._parsePwdValue(pwd);
+        return this.parsePwdValue(pwd);
     },
 
-    _parsePwdValue: function(pwd) {
+    parsePwdValue: function(pwd) {
         var groups = PASS_REGEX.exec(pwd);
         if (!groups)
             throw {name: "SyntaxError", message: "error_pass_syntax"};
@@ -250,14 +251,6 @@ var passCreator = {
         }
         return {user: user, pass: groups[3], passLen: groups[5],
                 iteration: groups[7], salt: groups[9], cmd: groups[11]};
-    },
-
-    _getUsername: function() {
-        try {
-            return this._findUsername();
-        } catch (e) {
-            return "";
-        }
     },
 
     _findUsername: function() {
@@ -423,8 +416,7 @@ var passCreator = {
         for (var i = 0; i < arguments.length; ++i) {
             info += arguments[i] || "";
         }
-        this.log("info: " + info);
-        return hasher.sha224In94(info);
+        return info;
     },
 
     _clearPass: function() {
@@ -470,7 +462,7 @@ var passCreator = {
             margin: auto; padding: 6px 2px; border: 2px outset; \
             -moz-border-radius: 10px; -webkit-border-radius: 10px; \
             border-radius: 10px; -khtml-border-radius: 10px; \
-            opacity: 0.8",
+            opacity: 1",
         labelCss: "float: left; width: 40%; margin-right: 6px; \
             padding-top: 2px; text-align: right; \
             font: normal 10pt arial,verdana,sans-serif",
@@ -603,4 +595,8 @@ var passCreator = {
 if (debug) {
     passCreator.settings.lang = 'zh';
 }
-passCreator.start();
+if (window.test) {
+    console.log("in test");
+} else {
+    passCreator.start();
+}
