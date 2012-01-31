@@ -142,8 +142,7 @@ var passCreator = {
 
     _autofill: function() {
         var domain = this._domain = getDomain();
-        var autoSubmit = this.settings.autoSubmit && this._form
-            && (this._pwdFlds.length == 1);
+        var autoSubmit = this.settings.autoSubmit;
         if (!domain) {
             if (location.href.indexOf("file://") == 0) {
                 domain = this._domain = "file"; // local
@@ -161,6 +160,7 @@ var passCreator = {
                 pwdValues.passLen, pwdValues.iteration, pwdValues.salt);
         this._pwdFld.value = pwd;
         this.markField(this._pwdFld);
+        autoSubmit &= (this._form && (this._pwdFlds.length == 1));
         var cmd = pwdValues.cmd;
         autoSubmit &= (cmd == null); // currently, any cmd means no-autoSubmit
         if (autoSubmit) {
