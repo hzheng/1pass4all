@@ -88,7 +88,7 @@ function getDomain(url) {
 }
 
 // password syntax
-var PASS_SYNTAX = "[user ]master_password[ pass_len][ *iteration][ +salt]"; 
+var PASS_SYNTAX = "[user ]master_password[ pass_len][ *hash_iteration][ +salt]"; 
 var PASS_REGEX = /^(([^ ]*) +)?([^ ]{6,})( +(\d{1,2}))?( +\*(\d+))?( +\+([^ ]+))?( +!([^ ]*))?$/;
 var MIN_PASS_LEN = 8;
 var MAX_PASS_LEN = 26;
@@ -575,21 +575,21 @@ var passCreator = {
             zh: "用户名为空"
         },
         error_iteration_not_number: {
-            en: "Iteration is not a number",
-            zh: "迭代次数应为数字"
+            en: "Hash iteration is not a number",
+            zh: "hash迭代次数应为数字"
         },
         error_pass_syntax: {
             en: "Password format error. \n" +
                 "The correct format is(bracketed terms are optional):\n" +
                 PASS_SYNTAX + "\n\n" +
-                "where the length of master_password is at least six,\n" +
-                "pass_len is a positive integer less than 100,\n" +
-                "iteration is a positive integer.",
+                "where the length of master_password is at least 6,\n" +
+                "the length of generated password pass_len is a positive integer less than 100,\n" +
+                "hash_iteration is a positive integer.",
             zh: "密码格式错误。正确格式为（[]内为可选项）：\n" +
                 PASS_SYNTAX + "\n\n" +
                 "其中主密码master_password长度不小于6位\n" +
-                "密码长度pass_len是一个小于100的正整数,\n" +
-                "迭代次数iteration是一个正整数。"
+                "生成密码长度pass_len是一个小于100的正整数,\n" +
+                "hash迭代次数hash_iteration是一个正整数。"
         },
         error_detect_user_with_multipwd: {
             en: 

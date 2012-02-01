@@ -17,7 +17,7 @@ $(COMPILED_JS): $(SRC_JS)
 $(INSTALL_HTM): $(COMPILED_JS)
 	@echo "generating installation page: " $@
 	@(echo "Please drag the link <a href='javascript:(function(){" | cat - $^; \
-		echo "})();'>1pass4all</a> to your browser's bookmark bar.") > $@
+		echo "})();'>1pass4all</a> to your browser's bookmark toolbar.") > $@
 
 $(BOOKMARK_URL): $(COMPILED_JS)
 	@echo "generating bookmark url: " $@

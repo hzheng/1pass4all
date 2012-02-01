@@ -1,32 +1,75 @@
 1pass4all
 =========
 
+Introduction
+------------
+
 1pass4all is a bookmarklet to create passwords easily and securely.
-Inspired by SuperGenPass, it offers some improvements: 
+Inspired by SuperGenPass, it offers some improvements as follows:
 
-1. result password is 94-base instead of 64-base.
+- security:
+
+  1pass4all is based on algorithm HMAC-SHA224, which is more secure than MD5.
+  Besides, the result password is 94-base instead of 64-base, and 
+  password's maximal length is 26 instead of 24.
+  What's more, it supports customized salt and hash iteration.  
+
+  Unlike SuperGenPass, 1pass4all takes username into account,
+  which means the same master password on the same website will generate
+  different passwords as long as usernames differ.
+
+- usability:
  
-2. based on algorithm HMAC-SHA224 instead of MD5.
+  When possible, 1pass4all will auto-login after generating password
+  without poping up a confirmation form.
 
-3. auto-sumbit when possible.
- 
-4. takes username into account.
+  It seems that SuperGenPass doesn't work well on password-change page.
+  For example, it wrongly autofills all passwords in yahoo mail, and
+  cannot even work in gmail.
 
-5. provides advanced features like hash iteration and salt.
+- functionality:
 
-6. provides special password syntax to take advantage of advanced features
-   (e.g. auto-detect username, customize password length, hash iteration, salt)
-   without popping up a new form.
-
-7. can work with gmail's password change.
-
-8. won't wrongly autofill all passwords(e.g. password change in yahoo mail)
+  To eliminate popup forms, 1pass4all provides a specialized password syntax
+  to utilize advanced features
+  (e.g. username auto-detection, password-length/hash-iteration/salt customization).
 
 Installation
 ------------
 
-After ``make``, open the install.html under ``build`` directory, then follow
-its instruction.
+After ``make``, open the install.html under ``build`` directory, then 
+drag the ``1pass4all`` link to your browser's bookmark toolbar.
+
+.. warning:: For security reason, each run of ``make`` generates different
+             random salts even on the same machine, which means the result
+             bookmarklets are *NOT* compatible.
+
+Usage
+-----
+
+After a master password(which is the ``1`` in ``1pass4all``) is typed into
+a password field on a login page, one click on the 1pass4all bookmarklet will
+create an actual password and log the user in(assume the password is correct).
+If the user would like the username to be taken into account,
+he can enter the username followed by a space before the master password, or,
+even simpler, he can just insert a single space before the master password
+(the only risk is ``1pass4all`` may guess the wrong username). 
+More generally, the password syntax is(bracketed terms are optional): ::
+
+    [user ]master_password[ pass_len][ *hash_iteration][ +salt]
+
+where ``master_password``'s length is at least 6, 
+generated password's length ``pass_len`` is less than 100, 
+``hash_iteration`` is a positive integer.
+
+.. note:: In a password-change or sign-up page with multiple password fields,
+          ``1pass4all`` will disable username auto-detection and form auto-submit.
+
+Troubleshooting
+---------------
+
+Chrome may crash when a user drags a link to its bookmark toolbar.
+If that happens, please create a bookmark manually, and copy the content of
+bookmark.url under ``build`` directory to the bookmark's URL.
 
 Reference
 ---------
