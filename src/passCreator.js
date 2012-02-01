@@ -8,36 +8,58 @@ var debug = true;
 Function.prototype.bind = function(object, moreArguments) {
     var __method__ = this;
     var prependArgs = [];
-    for (var i = 1; i < arguments.length; ++i)
+    for (var i = 1; i < arguments.length; ++i) {
         prependArgs.push(arguments[i]);
+    }
     return function() {
         var args = [];
-        for (var i = 0; i < prependArgs.length; ++i)
+        for (var i = 0; i < prependArgs.length; ++i) {
             args.push(prependArgs[i]);
-        for (var i = 0; i < arguments.length; ++i)
+        }
+        for (i = 0; i < arguments.length; ++i) {
             args.push(arguments[i]);
+        }
         return __method__.apply(object, args);
-    }
-} 
+    };
+}; 
 
 // utilities
 function isVisible(e) {
-    if (e.offsetWidth === 0 || e.offsetHeight === 0) return false;
+    if (e.offsetWidth === 0 || e.offsetHeight === 0) {return false;}
 
-    while (e.nodeName.toLowerCase() != 'body'
-            && (!e.style.display || e.style.display.toLowerCase() != 'none')
-            && (!e.style.visibility || e.style.visibility.toLowerCase() != 'hidden')) {
+    while (e.nodeName.toLowerCase() != 'body' &&
+            (!e.style.display || e.style.display.toLowerCase() != 'none') &&
+            (!e.style.visibility || e.style.visibility.toLowerCase() != 'hidden')) {
         e = e.parentNode;
     }
     return e.nodeName.toLowerCase() == 'body';
 }
 
+function setStyles(e, styles) {
+    for (var i in styles) {
+        if (styles.hasOwnProperty(i)) {
+            e.style[i] = styles[i];
+            if (i == 'cssFloat') {
+                e.style.styleFloat = styles[i]; // for IE
+            }
+        }
+    }
+}
+
+function setAttributes(e, attrs) {
+    for (var i in attrs) {
+        if (attrs.hasOwnProperty(i)) {
+            e.setAttribute(i, attrs[i]);
+        }
+    }
+}
+
 function createElement(tagName, parent, htm, styles, attrs) {
     var e = document.createElement(tagName || "div");
     (parent || document.body).appendChild(e);
-    if (htm) e.innerHTML = htm;
-    if (styles) setStyles(e, styles);
-    if (attrs) setAttributes(e, attrs);
+    if (htm) {e.innerHTML = htm;}
+    if (styles) {setStyles(e, styles);}
+    if (attrs) {setAttributes(e, attrs);}
     return e;
 }
 
@@ -52,21 +74,6 @@ function addCss(cssText) {
     document.body.appendChild(css);
 }
 
-function setStyles(e, styles) {
-    for (i in styles) {
-        e.style[i] = styles[i];
-        if (i == 'cssFloat') {
-            e.style.styleFloat = styles[i]; // for IE
-        }
-    }
-}
-
-function setAttributes(e, attrs) {
-    for (i in attrs) {
-        e.setAttribute(i, attrs[i]);
-    }
-}
-
 // auto retrieved TLD list from:
 // http://mxr.mozilla.org/mozilla/source/netwerk/dns/src/effective_tld_names.dat?raw=1
 var TLD_LIST = [
@@ -77,7 +84,7 @@ function getDomain(url) {
     var tlds = TLD_LIST.join("|").replace(/\./g, "\\.");
     url = url || location.hostname;
     var domain = new RegExp("\\.?([^\\.]+)\\.(" + tlds + ")$").exec(url);
-    if (domain) return domain[1];
+    if (domain) {return domain[1];}
 }
 
 // password syntax
@@ -85,8 +92,8 @@ var PASS_SYNTAX = "[user ]master_password[ pass_len][ *iteration][ +salt]";
 var PASS_REGEX = /^(([^ ]*) +)?([^ ]{6,})( +(\d{1,2}))?( +\*(\d+))?( +\+([^ ]+))?( +!([^ ]*))?$/;
 var MIN_PASS_LEN = 8;
 var MAX_PASS_LEN = 26;
-var VALID_PWD_PATTERN = new RegExp("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{" 
-        + MIN_PASS_LEN + "," + MAX_PASS_LEN + "}$");
+var VALID_PWD_PATTERN = new RegExp("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{" +
+        MIN_PASS_LEN + "," + MAX_PASS_LEN + "}$");
 
 // password generator
 var passCreator = {
@@ -96,14 +103,16 @@ var passCreator = {
     },
 
     generate: function(masterPwd, info, len, iteration, salt) {
-        this.log("pwd=" + masterPwd + ";info=" + info + ";len=" + len
-                + ";iteration=" + iteration + ";salt=" + salt);
-        if (!len)
+        this.log("pwd=" + masterPwd + ";info=" + info + ";len=" + len +
+                ";iteration=" + iteration + ";salt=" + salt);
+        if (!len) {
             len = this.settings.defaultPassLen;
-        if (len < MIN_PASS_LEN)
+        }
+        if (len < MIN_PASS_LEN) {
             len = MIN_PASS_LEN;
-        else if (len > MAX_PASS_LEN)
+        } else if (len > MAX_PASS_LEN) {
             len = MAX_PASS_LEN;
+        }
         masterPwd += (salt || this.settings.salt);
         this.log("salted master pass: " + masterPwd);
         info = hasher.sha224In94(info);
@@ -118,9 +127,10 @@ var passCreator = {
             pwd = hasher.hmacSha224In94(pwd + masterPwd, info);
             this.log("retry " + retry + "; generated pass len=" + pwd.length);
             var subPwd = pwd.substring(0, len);
-            if ((retry > this.VALID_PASS_RETRY)
-                    || (pwd.length >= len && this.validate(subPwd)))
+            if ((retry > this.VALID_PASS_RETRY) ||
+                    (pwd.length >= len && this.validate(subPwd))) {
                 return subPwd;
+            }
         }
     },
 
@@ -131,8 +141,9 @@ var passCreator = {
     start: function() {
         try {
             var result = this._autofill();
-            if (!result[0]) // no auto-submit
+            if (!result[0]) { // no auto-submit
                 this._showPasswordPanel(result[1]);
+            }
         } catch (e) {
             var msg = this.getMessage(e.message) || e.message;
             this.log(msg);
@@ -141,19 +152,21 @@ var passCreator = {
     },
 
     _autofill: function() {
-        var domain = this._domain = getDomain();
+        var domain = getDomain();
         var autoSubmit = this.settings.autoSubmit;
         if (!domain) {
-            if (location.href.indexOf("file://") == 0) {
-                domain = this._domain = "file"; // local
+            if (location.href.indexOf("file://") === 0) {
+                domain = "file"; // local
                 autoSubmit = false;
             }
-            else
+            else {
                 throw {name: "DomainError", message: "error_no_domain"};
+            }
         }
+        this._domain = domain;
 
         var pwdValues = this._checkPasswordFields();
-        if (!pwdValues) return [false, null];
+        if (!pwdValues) {return [false, null];}
  
         var pwd = this.generate(pwdValues.pass,
                 this._getInfo(domain, pwdValues.user),
@@ -162,7 +175,7 @@ var passCreator = {
         this.markField(this._pwdFld);
         autoSubmit &= (this._form && (this._pwdFlds.length == 1));
         var cmd = pwdValues.cmd;
-        autoSubmit &= (cmd == null); // currently, any cmd means no-autoSubmit
+        autoSubmit &= (cmd === undefined); // currently, any cmd means no-autoSubmit
         if (autoSubmit) {
             this.log("submitting");
             this._form.submit();
@@ -172,12 +185,13 @@ var passCreator = {
 
     _getDocument: function(doc) {
         var el = doc.activeElement;
-        if (!el || el.tagName != "IFRAME") return doc;
+        if (!el || el.tagName != "IFRAME") {return doc;}
 
         doc = el.contentWindow || el.contentDocument;
         try {
-            if (doc.document)
+            if (doc.document) {
                 doc = doc.document;
+            }
             return this._getDocument(doc);
         } catch (e) { // probably due to security reason(e.g. XSS)
             return document; // give up, return the original document
@@ -195,14 +209,16 @@ var passCreator = {
             var inputs = form.getElementsByTagName("input");
             for (var j = 0; j < inputs.length; ++j) {
                 var fld = inputs[j];
-                if (fld.type != "password" || !isVisible(fld))
+                if (fld.type != "password" || !isVisible(fld)) {
                     continue;
+                }
 
-                if (!this._form)
+                if (!this._form) {
                     this._form = form;
-                if (this._form == form)
+                }
+                if (this._form == form) {
                     pwdFlds.push(fld);
-                else if (focused == fld) {
+                } else if (focused == fld) {
                     // always use the first form that contains password,
                     // unless the later one's password field is focused
                     this._form = form;
@@ -210,7 +226,7 @@ var passCreator = {
                 }
             }
         }
-        if (pwdFlds.length == 0) {
+        if (pwdFlds.length === 0) {
             if (focused && focused.type == "password") { 
                 // last chance(no form)
                 pwdFlds = [fld];
@@ -220,14 +236,15 @@ var passCreator = {
             }
         } 
         var pwdFld;
-        for (var i = pwdFlds.length - 1; i >= 0; --i) {
+        for (i = pwdFlds.length - 1; i >= 0; --i) {
             if (pwdFlds[i] == focused) {
                 pwdFld = focused;
                 break;
             }
         }
-        if (!pwdFld) // choose the first one if none is focused
+        if (!pwdFld) { // choose the first one if none is focused
             pwdFld = pwdFlds[0];
+        }
         var pwd = pwdFld.value;
         if (!pwd) {
             this.markField(pwdFld, true);
@@ -242,11 +259,12 @@ var passCreator = {
 
     parsePwdValue: function(pwd) {
         var groups = PASS_REGEX.exec(pwd);
-        if (!groups)
+        if (!groups) {
             throw {name: "SyntaxError", message: "error_pass_syntax"};
+        }
 
         var user = groups[1] ? groups[2] : null;
-        if (user == "") { // autodetect user
+        if (user === "") { // autodetect user
             user = this._findUsername();
         }
         return {user: user, pass: groups[3], passLen: groups[5],
@@ -273,8 +291,8 @@ var passCreator = {
                     if (fld.type == "text" && isVisible(fld)) {
                         userFld = fld;
                         break;
-                    } else if (fld.type == "hidden" 
-                            && /(email|username|login)$/i.test(fld.name)) {
+                    } else if (fld.type == "hidden" &&
+                            /(email|username|login)$/i.test(fld.name)) {
                         userHidden = fld;
                     } else {
                         this.log("skipped " + fld);
@@ -314,15 +332,15 @@ var passCreator = {
         cssText += "#" + this.PANEL_ID + " input{" + this.settings.inputCss + "}";
         cssText += "#" + this.PANEL_ID + " button{" + this.settings.buttonCss + "}";
         addCss(cssText);
-        var panel = this._panel = createElement(null, null, null, null,
-                {id: this.PANEL_ID});
+        var panel = createElement(null, null, null, null, {id: this.PANEL_ID});
+        this._panel = panel;
         var titleBar = createElement('div', panel, null, this.settings.titleBarStyle);
         // add title text and close button
         createElement('span', titleBar, this.settings.title, this.settings.titleStyle);
         var hideBtn = createElement('a', titleBar, "&times", this.settings.topBtnStyle);
         hideBtn.onclick = this._hide.bind(this);
-        var moreBtn = this._moreBtn
-            = createElement('a', titleBar, "+", this.settings.topBtnStyle);
+        var moreBtn = createElement('a', titleBar, "+", this.settings.topBtnStyle);
+        this._moreBtn = moreBtn;
         moreBtn.onclick = this._toggleMore.bind(this);
         clearFloat(titleBar);
         createElement('label', panel, this.getMessage('label_domain'));
@@ -338,16 +356,18 @@ var passCreator = {
                 {type: "password", value: pwdValues && pwdValues.pass || ""});
         clearFloat(panel);
         createElement('label', panel, this.getMessage('label_pass_len'));
-        var passLenSelect = this._passLenSelect = createElement('select', panel);
+        var passLenSelect = createElement('select', panel);
+        this._passLenSelect = passLenSelect;
         var passLen = pwdValues && pwdValues.passLen || this.settings.defaultPassLen;
         for (var i = MIN_PASS_LEN; i <= MAX_PASS_LEN; ++i) {
             var option = createElement('option', passLenSelect, i, null, {value: i});
-            if (i == passLen)
+            if (i == passLen) {
                 option.setAttribute('selected', "true");
+            }
         }
         clearFloat(panel);
-        var advancedDiv = this._advancedDiv 
-            = createElement('div', panel, null, this.settings.advancedDivStyle); 
+        var advancedDiv = createElement('div', panel, null, this.settings.advancedDivStyle); 
+        this._advancedDiv = advancedDiv; 
         createElement('label', advancedDiv, this.getMessage('label_iteration'));
         this._iterationField = createElement('input', advancedDiv, null, null,
                 {value: pwdValues && pwdValues.iteration || this.settings.iteration});
@@ -363,7 +383,8 @@ var passCreator = {
                 this.settings.rightBtnStyle);
         clearBtn.onclick = this._clearPass.bind(this);
         clearFloat(cmdDiv);
-        var resultDiv = this._resultDiv = createElement('div', panel, null, this.settings.resultDivStyle);
+        var resultDiv = createElement('div', panel, null, this.settings.resultDivStyle);
+        this._resultDiv = resultDiv;
         createElement('label', resultDiv, this.getMessage('label_result'));
         this._genPassField = createElement('input', resultDiv, null, 
                 this.settings.genpassStyle, {disabled: "true"});
@@ -407,7 +428,7 @@ var passCreator = {
         this.hideError();
         this._genPassField.value = this.generate(masterPwd,
                 this._getInfo(domain, this._userField.value),
-                this._passLenSelect.value, parseInt(iteration), this._saltField.value);
+                this._passLenSelect.value, parseInt(iteration, 10), this._saltField.value);
         this._resultDiv.style.display = "block";
     },
 
@@ -439,13 +460,13 @@ var passCreator = {
     },
 
     log: function(msg) {
-        if (debug) console.log(msg);
+        if (debug) {console.log(msg);}
     },
 
     getMessage: function(msgId) {
         var msg = this.messages[msgId] || "";
         if (msg) {
-            msg = msg[this.settings.lang] || msg['en'];
+            msg = msg[this.settings.lang] || msg.en;
         }
         return msg;
     },
@@ -457,18 +478,17 @@ var passCreator = {
     // customizable settings
     settings: {
         title: app.name + " " + app.version,
-        panelCss: "position: fixed; top: 2px; right: 2px; width: 320px; \
-            z-index: 2147483647; background-color: #c9c9c9; \
-            margin: auto; padding: 6px 2px; border: 2px outset; \
-            -moz-border-radius: 10px; -webkit-border-radius: 10px; \
-            border-radius: 10px; -khtml-border-radius: 10px; \
-            opacity: 1",
-        labelCss: "float: left; width: 40%; margin-right: 6px; \
-            padding-top: 2px; text-align: right; \
-            font: normal 10pt arial,verdana,sans-serif",
+        panelCss: "position: fixed; top: 2px; right: 2px; width: 320px;" +
+            "z-index: 2147483647; background-color: #c9c9c9;" +
+            "margin: auto; padding: 6px 2px; border: 2px outset;" +
+            "-moz-border-radius: 10px; -webkit-border-radius: 10px;" +
+            "border-radius: 10px; -khtml-border-radius: 10px;",
+        labelCss: "float: left; width: 40%; margin-right: 6px;" +
+            "padding-top: 2px; text-align: right;" +
+            "font: normal 10pt arial,verdana,sans-serif",
         inputCss: "width: 55%; margin: 3px 2px;",
-        buttonCss: "background: #7182A4; color: #FFFFFF; \
-            margin: 2px; border: 1px outset silver",
+        buttonCss: "background: #7182A4; color: #FFFFFF;" +
+            "margin: 2px; border: 1px outset silver",
         titleBarStyle: {width: "100%", 
             color: "#1E1F21", backgroundColor: "transparent",
             borderBottom: "2px inset #CACED6",

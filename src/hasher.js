@@ -11,7 +11,7 @@
 /** Convert a string to binary format(i.e. array of big-endian 32-bit words).
  */
 function str2bin(str) {
-    var bin = Array(str.length >> 2);
+    var bin = [];
     for(var i = 0, len = str.length << 3; i < len; i += 8) {
         bin[i >> 5] |= (str.charCodeAt(i >> 3) & 0xFF) << (24 - (i & 0x1F));
     }
@@ -45,7 +45,7 @@ function shortenBitBlock(bitBlocks, longBits, shortBits) {
             bits += longBits;
         }
         result.unshift(n & mask);
-        if (index < 0) break;
+        if (index < 0) {break;}
         bitBlocks[index] >>>= shift;
     }
     return result;
@@ -56,7 +56,7 @@ function shortenBitBlock(bitBlocks, longBits, shortBits) {
  */
 function base94(_32bitBlocks) {
     var _7bitBlocks = shortenBitBlock(_32bitBlocks, 32, 7);
-    _7bitBlocks = _7bitBlocks.map(function(n) {return n < 94 ? String.fromCharCode(33 + n) : ""});
+    _7bitBlocks = _7bitBlocks.map(function(n) {return n < 94 ? String.fromCharCode(33 + n) : "";});
     return _7bitBlocks.join("");
 }
 
@@ -74,12 +74,12 @@ function rightRotate(n, bits) {
 
 if (!Array.prototype.map) { // for IE
     Array.prototype.map = function(fun, thisObj) {
-        var len = this.length;
-        var res = new Array(len);
+        var res = [];
         var scope = thisObj || window;
-        for (var i = 0; i < len; ++i) {
-            if (i in this)
+        for (var i = 0; i < this.length; ++i) {
+            if (i in this) {
                 res[i] = fun.call(scope, this[i], i, this);
+            }
         }
         return res;
     };
@@ -93,8 +93,8 @@ var hasher = {
 
     _sha256Hash: function(message, bitlen, is224) {
         var H = is224 ? [0xC1059ED8, 0x367CD507, 0x3070DD17, 0xF70E5939,
-                         0xFFC00B31, 0x68581511, 0x64F98FA7, 0xBEFA4FA4]
-                      : [0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
+                         0xFFC00B31, 0x68581511, 0x64F98FA7, 0xBEFA4FA4] :
+                        [0x6A09E667, 0xBB67AE85, 0x3C6EF372, 0xA54FF53A,
                          0x510E527F, 0x9B05688C, 0x1F83D9AB, 0x5BE0CD19];
         var K = [0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5,
                  0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
@@ -112,7 +112,7 @@ var hasher = {
                  0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
                  0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208,
                  0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2];
-        var w = new Array(64);
+        var w = [];
         // pre-processing
         message[bitlen >> 5] |= 0x80 << (24 - (bitlen & 0x1F));
         message[((bitlen + 64 >> 9) << 4) + 15] = bitlen;
@@ -127,22 +127,20 @@ var hasher = {
             var g = H[6];
             var h = H[7];
             for (var i = 0; i < 64; ++i) {
-                if (i < 16) // original words
+                if (i < 16) { // original words
                     w[i] = message[i + msgIndex];
-                else { // extended words
-                    var s0 = rightRotate(w[i - 15], 7)
-                        ^ rightRotate(w[i - 15], 18) ^ (w[i - 15] >>> 3);
-                    var s1 = rightRotate(w[i - 2], 17)
-                        ^ rightRotate(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+                } else { // extended words
+                    var s0 = rightRotate(w[i - 15], 7) ^
+                             rightRotate(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+                    var s1 = rightRotate(w[i - 2], 17) ^
+                             rightRotate(w[i - 2], 19) ^ (w[i - 2] >>> 10);
                     w[i] = add(add(add(s1, w[i - 7]), s0), w[i - 16]);
                 }
                 // start shuffling
-                var s0 = rightRotate(a, 2) 
-                    ^ rightRotate(a, 13) ^ rightRotate(a, 22);
+                s0 = rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22);
                 var maj = (a & b) ^ (a & c) ^ (b & c);
                 var t2 = add(s0, maj);
-                var s1 = rightRotate(e, 6) 
-                    ^ rightRotate(e, 11) ^ rightRotate(e, 25);
+                s1 = rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25);
                 var ch = (e & f) ^ ((~e) & g);
                 var t1 = add(add(add(add(h, s1), ch), K[i]), w[i]);
                 h = g;
@@ -181,11 +179,11 @@ var hasher = {
     _hmacSha256: function(key, keyBitLen, msg, msgBitLen, is224) {
         var blockSize = 16; // in 32-bit word
         var blockBits = blockSize << 5;
-        if (keyBitLen > blockBits)
+        if (keyBitLen > blockBits) {
             key = this._sha256Hash(key, keyBitLen, is224);
+        }
 
-        var innerPadded = Array(blockSize);
-        var outerPadded = Array(blockSize);
+        var innerPadded = [], outerPadded = [];
         for (var i = 0; i < blockSize; ++i) {
             innerPadded[i] = key[i] ^ 0x36363636;
             outerPadded[i] = key[i] ^ 0x5C5C5C5C;
