@@ -37,7 +37,8 @@ Installation
 ------------
 
 After ``make``, open the install.html under ``build`` directory, then 
-drag the ``1pass4all`` link to your browser's bookmark toolbar.
+drag the ``1pass4all`` link to your browser's bookmark toolbar,
+or right click it and add it to your bookmarks. 
 
 .. warning:: For security reason, each run of ``make`` generates different
              random salts even on the same machine, which means the result

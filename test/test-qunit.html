@@ -2,6 +2,7 @@
 "http://www.w3.org/TR/html4/loose.dtd">
 <html>
     <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <script src="http://code.jquery.com/jquery-latest.js"></script>
         <link rel="stylesheet" href="http://code.jquery.com/qunit/git/qunit.css" type="text/css" media="screen" />
         <script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
@@ -96,22 +97,25 @@
                     equal(getDomain("henrietta.liswa.wb.gov.au"), "wb", "domain of gov.au");
                     equal(getDomain("sudomain.abc.政府.hk"), "abc", "Chinese domain");
                 });
-                test("password-syntax test", 9, function() {
+                test("password-syntax test", 10, function() {
                     deepEqual(passCreator.parsePwdValue("masterpass"),
-                    {user: null, pass: "masterpass", passLen: undefined,
-                        iteration: undefined, salt: undefined, cmd: undefined}, "simplest password");
+                    {user: null, pass: "masterpass", passLen: 0,
+                        iteration: 0, salt: "", cmd: ""}, "simplest password");
+                    deepEqual(passCreator.parsePwdValue(" masterpass", true),
+                    {user: "", pass: "masterpass", passLen: 0,
+                        iteration: 0, salt: "", cmd: ""}, "password with empty user");
                     deepEqual(passCreator.parsePwdValue("login masterpass"),
-                    {user: "login", pass: "masterpass", passLen: undefined,
-                        iteration: undefined, salt: undefined, cmd: undefined}, "password with user");
+                    {user: "login", pass: "masterpass", passLen: 0,
+                        iteration: 0, salt: "", cmd: ""}, "password with user");
                     deepEqual(passCreator.parsePwdValue("login masterpass 20"),
                     {user: "login", pass: "masterpass", passLen: "20",
-                        iteration: undefined, salt: undefined, cmd: undefined}, "normal password");
+                        iteration: 0, salt: "", cmd: ""}, "normal password");
                     deepEqual(passCreator.parsePwdValue("login masterpass 20 *100"),
                     {user: "login", pass: "masterpass", passLen: "20",
-                        iteration: "100", salt: undefined, cmd: undefined}, "password without salt and cmd");
+                        iteration: "100", salt: "", cmd: ""}, "password without salt and cmd");
                     deepEqual(passCreator.parsePwdValue("login masterpass 20 *100 +salt"),
                     {user: "login", pass: "masterpass", passLen: "20",
-                        iteration: "100", salt: "salt", cmd: undefined}, "password without cmd");
+                        iteration: "100", salt: "salt", cmd: ""}, "password without cmd");
                     deepEqual(passCreator.parsePwdValue("login masterpass 20 *100 +salt !command"),
                     {user: "login", pass: "masterpass", passLen: "20",
                         iteration: "100", salt: "salt", cmd: "command"}, "full password");

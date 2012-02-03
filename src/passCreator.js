@@ -55,7 +55,12 @@ function setAttributes(e, attrs) {
 }
 
 function createElement(tagName, parent, htm, styles, attrs) {
-    var e = document.createElement(tagName || "div");
+    var el = tagName || "div";
+    if (attrs && ("type" in attrs) && document.all) { // IE cannot change type
+        el = "<" + el + " type=" + attrs.type + "/>";
+        delete attrs.type;
+    }
+    var e = document.createElement(el);
     (parent || document.body).appendChild(e);
     if (htm) {e.innerHTML = htm;}
     if (styles) {setStyles(e, styles);}
@@ -70,7 +75,12 @@ function clearFloat(parent) {
 function addCss(cssText) {
     var css = document.createElement("style");
     css.type = "text/css";
-    css.innerHTML = cssText;
+    if (css.styleSheet) { // IE
+        css.styleSheet.cssText = cssText;
+    } else {
+        css.appendChild(document.createTextNode(cssText));
+        //css.innerHTML = cssText;
+    }
     document.body.appendChild(css);
 }
 
@@ -119,8 +129,9 @@ var passCreator = {
         this.log("hashed info: " + info);
 
         var pwd = "";
-        for (var i = (iteration || this.settings.iteration) - 1; i > 0; --i) {
-            this.log("prehash...");
+        var hashTimes = iteration || this.settings.iteration;
+        this.log("hash " + hashTimes + " times...");
+        for (var i = hashTimes - 1; i > 0; --i) { // 1 hash remaining
             pwd = hasher.hmacSha224In94(pwd + masterPwd, info);
         }
         for (var retry = 0; ; ++retry) {
@@ -175,7 +186,7 @@ var passCreator = {
         this.markField(this._pwdFld);
         autoSubmit &= (this._form && (this._pwdFlds.length == 1));
         var cmd = pwdValues.cmd;
-        autoSubmit &= (cmd === undefined); // currently, any cmd means no-autoSubmit
+        autoSubmit &= (cmd === ""); // currently, any command means no-autoSubmit
         if (autoSubmit) {
             this.log("submitting");
             this._form.submit();
@@ -257,18 +268,18 @@ var passCreator = {
         return this.parsePwdValue(pwd);
     },
 
-    parsePwdValue: function(pwd) {
+    parsePwdValue: function(pwd, noAutoDetect) {
         var groups = PASS_REGEX.exec(pwd);
         if (!groups) {
             throw {name: "SyntaxError", message: "error_pass_syntax"};
         }
 
         var user = groups[1] ? groups[2] : null;
-        if (user === "") { // autodetect user
+        if (user === "" && !noAutoDetect) { // autodetect user
             user = this._findUsername();
         }
-        return {user: user, pass: groups[3], passLen: groups[5],
-                iteration: groups[7], salt: groups[9], cmd: groups[11]};
+        return {user: user, pass: groups[3], passLen: groups[5] || 0,
+                iteration: groups[7] || 0, salt: groups[9] || "", cmd: groups[11] || ""};
     },
 
     _findUsername: function() {
@@ -460,13 +471,24 @@ var passCreator = {
     },
 
     log: function(msg) {
-        if (debug) {console.log(msg);}
+        if (debug) {
+            try {
+                console.log(msg);
+            } catch (e) {
+                alert(msg);
+            }
+        }
     },
 
     getMessage: function(msgId) {
         var msg = this.messages[msgId] || "";
         if (msg) {
-            msg = msg[this.settings.lang] || msg.en;
+            var lang = this.settings.lang;
+            var hyphen = lang.indexOf("-");
+            if (hyphen > 0) { // currently, just ignore the country part
+                lang = lang.substring(0, hyphen);
+            }
+            msg = msg[lang] || msg.en;
         }
         return msg;
     },
@@ -612,11 +634,8 @@ var passCreator = {
     }
 };
 
-if (debug) {
-    passCreator.settings.lang = 'zh';
-}
-if (window.test) {
-    console.log("in test");
+if (window.test && debug) {
+    passCreator.log("in test");
 } else {
     passCreator.start();
 }
