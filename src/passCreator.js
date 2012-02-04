@@ -3,7 +3,7 @@
  */
 
 var app = {name: "1Pass4All", version: "0.1"};
-var debug = true;
+var debug = true; // this will be turned off by make
 
 Function.prototype.bind = function(object, moreArguments) {
     var __method__ = this;
@@ -24,6 +24,19 @@ Function.prototype.bind = function(object, moreArguments) {
 }; 
 
 // utilities
+function extend(destProps, srcProps) {
+    if (!srcProps) {return;}
+
+    for (var i in srcProps) {
+        if (srcProps.hasOwnProperty(i)) {
+            var prop = srcProps[i];
+            if (prop !== undefined) {
+                destProps[i] = prop;
+            }
+        }
+    }
+}
+
 function isVisible(e) {
     if (e.offsetWidth === 0 || e.offsetHeight === 0) {return false;}
 
@@ -116,14 +129,14 @@ var passCreator = {
         this.log("pwd=" + masterPwd + ";info=" + info + ";len=" + len +
                 ";iteration=" + iteration + ";salt=" + salt);
         if (!len) {
-            len = this.settings.defaultPassLen;
+            len = this.settings.passLen;
         }
         if (len < MIN_PASS_LEN) {
             len = MIN_PASS_LEN;
         } else if (len > MAX_PASS_LEN) {
             len = MAX_PASS_LEN;
         }
-        masterPwd += (salt || this.settings.salt);
+        masterPwd += (salt || this.settings.salt || "");
         this.log("salted master pass: " + masterPwd);
         info = hasher.sha224In94(info);
         this.log("hashed info: " + info);
@@ -149,7 +162,8 @@ var passCreator = {
         setStyles(field, this.settings[error ? "fldFailStyle" : "fldSucceedStyle"]);
     },
 
-    start: function() {
+    start: function(settings) {
+        extend(this.settings, settings);
         try {
             var result = this._autofill();
             if (!result[0]) { // no auto-submit
@@ -369,7 +383,7 @@ var passCreator = {
         createElement('label', panel, this.getMessage('label_pass_len'));
         var passLenSelect = createElement('select', panel);
         this._passLenSelect = passLenSelect;
-        var passLen = pwdValues && pwdValues.passLen || this.settings.defaultPassLen;
+        var passLen = pwdValues && pwdValues.passLen || this.settings.passLen;
         for (var i = MIN_PASS_LEN; i <= MAX_PASS_LEN; ++i) {
             var option = createElement('option', passLenSelect, i, null, {value: i});
             if (i == passLen) {
@@ -532,8 +546,8 @@ var passCreator = {
         fldSucceedStyle: {background: "#33FF66"},
         fldFailStyle: {background: "red"},
         autoSubmit: true,
-        defaultPassLen: 12,
-        iteration: 999,
+        passLen: 10,
+        iteration: 100,
         salt: "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO",
         lang: window.navigator.userLanguage || window.navigator.language
     },
@@ -637,5 +651,5 @@ var passCreator = {
 if (window.test && debug) {
     passCreator.log("in test");
 } else {
-    passCreator.start();
+    passCreator.start({salt: "THIS WILL BE REPLACED BY MAKE"});
 }

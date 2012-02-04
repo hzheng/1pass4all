@@ -4,7 +4,10 @@
 Introduction
 ------------
 
-1pass4all is a bookmarklet to create passwords easily and securely.
+*1pass4all* is a bookmarklet to create passwords easily and securely.
+With the aid of it, a user can log on different websites with different passwords,
+while keeping only one master password (which is the ``1`` in ``1pass4all``) in mind.
+The best part is that one compromised passowrd will hardly impact other ones.
 Inspired by SuperGenPass, it offers some improvements as follows:
 
 - security:
@@ -21,7 +24,7 @@ Inspired by SuperGenPass, it offers some improvements as follows:
 - usability:
  
   When possible, 1pass4all will auto-login after generating password
-  without poping up a confirmation form.
+  without popping up a confirmation form.
 
   It seems that SuperGenPass doesn't work well on password-change page.
   For example, it wrongly autofills all passwords in yahoo mail, and
@@ -37,23 +40,25 @@ Installation
 ------------
 
 After ``make``, open the install.html under ``build`` directory, then 
-drag the ``1pass4all`` link to your browser's bookmark toolbar,
-or right click it and add it to your bookmarks. 
+follow the instructions there.
 
 .. warning:: For security reason, each run of ``make`` generates different
              random salts even on the same machine, which means the result
-             bookmarklets are *NOT* compatible.
-
+             bookmarklets are *NOT* compatible. 
+             To keep the bookmarklets compatible, you should make sure
+             they come from the same version and the salts(specified at 
+             next to the last line in the scripts) are exactly the same.
+ 
 Usage
 -----
 
-After a master password(which is the ``1`` in ``1pass4all``) is typed into
-a password field on a login page, one click on the 1pass4all bookmarklet will
+After a master password is typed into a password field on a login page,
+one click on the 1pass4all bookmarklet will
 create an actual password and log the user in(assume the password is correct).
 If the user would like the username to be taken into account,
 he can enter the username followed by a space before the master password, or,
 even simpler, he can just insert a single space before the master password
-(the only risk is ``1pass4all`` may guess the wrong username). 
+(the only risk is 1pass4all might guess the wrong username). 
 More generally, the password syntax is(bracketed terms are optional): ::
 
     [user ]master_password[ pass_len][ *hash_iteration][ +salt]
@@ -71,6 +76,9 @@ Troubleshooting
 Chrome may crash when a user drags a link to its bookmark toolbar.
 If that happens, please create a bookmark manually, and copy the content of
 bookmark.url under ``build`` directory to the bookmark's URL.
+
+``1Pass4All`` has been tested(but not fully) in latest browsers including 
+Firefox, Chrome, IE, Safari and Opera. Please let me know if you find a bug.
 
 Reference
 ---------
