@@ -1,0 +1,6 @@
+auto: true
+pygments: true
+markdown: rdiscount
+rdiscount:
+ extensions: [smart]
+author: Hui Zheng
