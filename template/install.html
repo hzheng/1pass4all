@@ -4,24 +4,53 @@
         <title>1pass4all's installation</title>
     </head>
     <body>
-        <h2>1pass4all's installation</h2>
+        <h2>1pass4all (version $VERSION)</h2>
+        <h3>Installation instructions:</h3>
         <p>
-            Please drag the link <a href='javascript: 
-            $SCRIPT
-            '>1pass4all</a> to your browser's bookmarks bar,
-            or copy the <a href="bookmark.url">script</a> into a bookmark's URL.
+            For browsers like Firefox, Chrome, Safari and Opera, we recommend you 
+            drag the link <a id="bookmarklet1" href='javascript: 
+                $SCRIPT
+            '>1pass4all</a> to bookmarks bar, or right click it to add to your bookmarks.
         </p>
 
         <p>
-            <strong>Exception</strong>: since IE's bookmarklet(or favelet) has size limit, you have to drag
-            <a href='javascript:s=document.createElement("script");s.type="text/javascript";s.src="
-                $SCRIPT_URL
-                ";document.body.appendChild(s);void(0);'>1pass4all</a> to IE's favorites bar.
+            For Internet Explorer, whose bookmarklet(or favelet) has size limit,
+            you MUST instead drag this link
+            <a id="bookmarklet2" href='javascript:_1pass4all_settings={salt:"$SALT"};s=document.createElement("script");s.type="text/javascript";s.src="$SCRIPT_URL";document.body.appendChild(s);void(0);'>1pass4all</a> to favorites bar.
+        </p>
+        
+        <p>
+            An advanced user can checkout the project on the master branch
+            (<code>git clone git://github.com/hzheng/1pass4all</code>),
+            then check the README file.
+        </p>
+
+        <h3>Note:</h3>
+        <p>
+            Before installation, you may change the 
+            <a href="http://en.wikipedia.org/wiki/Salt_(cryptography)">salt</a> for better security
+            (<em>ignore it if you have manually generated this page by make</em>).<br/>
+            You MUST make sure the bookmarklets installed on different browsers or machines have the same salt,
+            otherwise they are NOT compatible.
         </p>
         <p>
-            <em>Warning</em>: The script in IE will NOT be compatible with those in other browsers,
-            unless they have the same salts.
+            Old salt: <br/>
+            <input size="64" readonly="true" value='$SALT'/><br/>
+            New salt(any random characters except quotes):<br/>
+            <input id="salt" size="64" value=''/><br/>
+            <button onclick="changeSalt()">change salt</button>
         </p>
+        <script>
+            function changeSalt() {
+                var salt = document.getElementById("salt").value.replace(/['"]/g, "");
+                var saltRegex = /(salt:")[^"]*"/;
+                var bookmarklet1 = document.getElementById("bookmarklet1");
+                bookmarklet1.href = bookmarklet1.href.replace(saltRegex, "$1" + salt + '"');
+                var bookmarklet2 = document.getElementById("bookmarklet2");
+                // Safari need unescape
+                bookmarklet2.href = unescape(bookmarklet2.href).replace(saltRegex, "$1" + salt + '"');
+            }
+        </script>
     </body>
 </html>
 

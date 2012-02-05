@@ -40,14 +40,15 @@ Installation
 ------------
 
 After ``make``, open the install.html under ``build`` directory, then 
-follow the instructions there.
+follow the instructions there. 
+Or, simple check the ``install`` part on `project page <http://hzheng.github.com/1pass4all/>`_.
+
 
 .. warning:: For security reason, each run of ``make`` generates different
              random salts even on the same machine, which means the result
              bookmarklets are *NOT* compatible. 
              To keep the bookmarklets compatible, you should make sure
-             they come from the same version and the salts(specified at 
-             next to the last line in the scripts) are exactly the same.
+             they come from the same version and the salts are exactly the same.
  
 Usage
 -----
@@ -70,15 +71,14 @@ generated password's length ``pass_len`` is less than 100,
 .. note:: In a password-change or sign-up page with multiple password fields,
           ``1pass4all`` will disable username auto-detection and form auto-submit.
 
-Troubleshooting
----------------
+Disclaimer 
+----------
 
-Chrome may crash when a user drags a link to its bookmark toolbar.
-If that happens, please create a bookmark manually, and copy the content of
-bookmark.url under ``build`` directory to the bookmark's URL.
+This software is free to use at your own risk.
+It has been tested(but not fully) in latest browsers including 
+Firefox, Chrome, IE, Safari and Opera, and you're welcome to report any bug
+or suggestion to xyzdll [AT] gmail [DOT] com.
 
-``1Pass4All`` has been tested(but not fully) in latest browsers including 
-Firefox, Chrome, IE, Safari and Opera. Please let me know if you find a bug.
 
 Reference
 ---------

@@ -2,8 +2,11 @@
  * A password generator inspired by SuperGenPass(http://supergenpass.com)
  */
 
-var app = {name: "1Pass4All", version: "0.1"};
-var debug = true; // this will be turned off by make
+var app = {
+    name: "1Pass4All",
+    version: "0.1x" // will be updated by make
+};
+var debug = true; // will be turned off by make
 
 Function.prototype.bind = function(object, moreArguments) {
     var __method__ = this;
@@ -412,7 +415,7 @@ var passCreator = {
         this._resultDiv = resultDiv;
         createElement('label', resultDiv, this.getMessage('label_result'));
         this._genPassField = createElement('input', resultDiv, null, 
-                this.settings.genpassStyle, {disabled: "true"});
+                this.settings.genpassStyle, {readonly: "true"});
         this._errorDiv = createElement('div', panel, null, this.settings.errorDivStyle);
     },
 
@@ -548,7 +551,7 @@ var passCreator = {
         autoSubmit: true,
         passLen: 10,
         iteration: 100,
-        salt: "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO",
+        salt: "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO", // will be updated by make
         lang: window.navigator.userLanguage || window.navigator.language
     },
 
@@ -651,5 +654,5 @@ var passCreator = {
 if (window.test && debug) {
     passCreator.log("in test");
 } else {
-    passCreator.start({salt: "THIS WILL BE REPLACED BY MAKE"});
+    passCreator.start(window._1pass4all_settings); // read global settings
 }
