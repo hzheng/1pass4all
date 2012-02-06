@@ -549,8 +549,8 @@ var passCreator = {
         fldSucceedStyle: {background: "#33FF66"},
         fldFailStyle: {background: "red"},
         autoSubmit: true,
-        passLen: 10,
-        iteration: 100,
+        passLen: 10, // will be updated by make
+        iteration: 100, // will be updated by make
         salt: "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO", // will be updated by make
         lang: window.navigator.userLanguage || window.navigator.language
     },

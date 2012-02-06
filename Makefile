@@ -9,6 +9,8 @@ FIXED_SALT = 9rjixtK35p091K2glFZWDgueRFqmSNfX
 SALT = $(DYNAMIC_SALT)
 # uncomment the next line when you need a constant salt
 #SALT = $(FIXED_SALT)
+PASS_LEN = 10
+ITERATION = 100
 SRC_DIR = src
 LIB_DIR = lib
 TPL_DIR = template
@@ -30,6 +32,8 @@ $(COMPILED_JS): $(SRC_JS)
 	@echo "compiling $^ to $@ (salt: $(SALT))"
 	@mkdir -p $(RESULT_DIR)
 	@sed -e 's/\(version: "\).*"/\1$(VERSION)"/' -e 's/\(debug = \)true/\10/' \
+		 -e 's/\(passLen: \)[0-9]*,/\1$(PASS_LEN),/' \
+		 -e 's/\(iteration: \)[0-9]*,/\1$(ITERATION),/' \
 		 -e 's/\(salt: "\).*"/\1$(SALT)"/' $^ \
 	 | java -jar $(LIB_DIR)/compiler.jar --js_output_file $@
 
