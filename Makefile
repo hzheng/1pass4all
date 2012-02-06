@@ -1,9 +1,9 @@
 APP = 1pass4all
-VERSION = 0.1
+VERSION = 0.1.0
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
 TIME := $(shell date +%Y_%m%d_%H%M)
-PUBLISHED_TIME := 2012_0206_0038
+PUBLISHED_TIME := 2012_0206_1220
 SALT := $(shell base64 < /dev/urandom | tr / - | head -c 32)
 
 SRC_DIR = src
@@ -43,6 +43,7 @@ $(INSTALL_HTM): $(ENCODED_JS) $(INSTALL_TPL)
 	@echo "generating installation page: " $@
 	@sed -e 's/$$VERSION/$(VERSION)/'  -e 's/$$SALT/$(SALT)/' -e 's/$$SCRIPT_URL/$(SCRIPT_URL)/' $(INSTALL_TPL) \
 		| awk '{if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
+	@cp $@ $(BUILD_DIR)/
 
 $(BOOKMARK_URL): $(RESULT_JS)
 	@echo "generating bookmark url:" $@

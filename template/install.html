@@ -20,7 +20,7 @@
         </p>
         
         <p>
-            An advanced user can checkout the project on the master branch
+            An advanced user can check out the project on the master branch
             (<code>git clone git://github.com/hzheng/1pass4all</code>),
             then check the README file.
         </p>
@@ -37,12 +37,25 @@
             Old salt: <br/>
             <input size="64" readonly="true" value='$SALT'/><br/>
             New salt(any random characters except quotes):<br/>
-            <input id="salt" size="64" value=''/><br/>
+            <input id="salt" size="64" value=''/>
+            <a href="javascript:createSalt()">auto create</a><br/>
             <button onclick="changeSalt()">change salt</button>
         </p>
         <script>
+            var saltInput = document.getElementById("salt");
+            function createSalt(size) {
+                // base64 characters
+                var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
+                var maxCharIndex = chars.length - 1;
+                var salts = [];
+                for (var i = size || 32; i > 0; --i) {
+                    salts.push(chars[Math.floor(Math.random() * maxCharIndex)]);
+                }
+                saltInput.value = salts.join("");
+            }
+
             function changeSalt() {
-                var salt = document.getElementById("salt").value.replace(/['"]/g, "");
+                var salt = saltInput.value.replace(/['"]/g, "");
                 var saltRegex = /(salt:")[^"]*"/;
                 var bookmarklet1 = document.getElementById("bookmarklet1");
                 bookmarklet1.href = bookmarklet1.href.replace(saltRegex, "$1" + salt + '"');

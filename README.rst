@@ -48,7 +48,7 @@ Or, simple check the ``install`` part on `project page <http://hzheng.github.com
              random salts even on the same machine, which means the result
              bookmarklets are *NOT* compatible. 
              To keep the bookmarklets compatible, you should make sure
-             they come from the same version and the salts are exactly the same.
+             they come from the same main version and the salts are exactly the same.
  
 Usage
 -----
