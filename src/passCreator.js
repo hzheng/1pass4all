@@ -169,13 +169,16 @@ var passCreator = {
         extend(this.settings, settings);
         try {
             var result = this._autofill();
-            if (!result[0]) { // no auto-submit
-                this._showPasswordPanel(result[1]);
-            }
         } catch (e) {
-            var msg = this.getMessage(e.message) || e.message;
-            this.log(msg);
-            this.alert(msg);
+            this.handleError(e, "autofill");
+            if (e.retry) {return;}
+        }
+        try {
+            if (!result || !result[0]) { // no auto-submit
+                this._showPasswordPanel(result && result[1]);
+            }
+        } catch (e2) {
+            this.handleError(e2, "showPanel");
         }
     },
 
@@ -188,7 +191,7 @@ var passCreator = {
                 autoSubmit = false;
             }
             else {
-                throw {name: "DomainError", message: "error_no_domain"};
+                this.raiseError("DomainError", "error_no_domain", true);
             }
         }
         this._domain = domain;
@@ -234,7 +237,9 @@ var passCreator = {
         var forms = doc.forms || [];
         for (var i = 0; i < forms.length; ++i) {
             var form = forms[i];
-            var inputs = form.getElementsByTagName("input");
+            // form.getElementsByTagName won't work(except IE) if form is inside a table
+            //var inputs = form.getElementsByTagName("input");
+            var inputs = form.elements;
             for (var j = 0; j < inputs.length; ++j) {
                 var fld = inputs[j];
                 if (fld.type != "password" || !isVisible(fld)) {
@@ -277,7 +282,7 @@ var passCreator = {
         if (!pwd) {
             this.markField(pwdFld, true);
             pwdFld.focus();
-            throw {name: "PasswordError", message: "error_empty_pass"};
+            this.raiseError("PasswordError", "error_empty_pass");
         } 
  
         this._pwdFlds = pwdFlds;
@@ -288,7 +293,7 @@ var passCreator = {
     parsePwdValue: function(pwd, noAutoDetect) {
         var groups = PASS_REGEX.exec(pwd);
         if (!groups) {
-            throw {name: "SyntaxError", message: "error_pass_syntax"};
+            this.raiseError("SyntaxError", "error_pass_syntax");
         }
 
         var user = groups[1] ? groups[2] : null;
@@ -302,8 +307,7 @@ var passCreator = {
     _findUsername: function() {
         // ask for autodetect username
         if (this._pwdFlds.length > 1) {
-            throw {name: "PasswordError",
-                   message: "error_detect_user_with_multipwd"};
+            this.raiseError("PasswordError", "error_detect_user_with_multipwd");
         }
 
         var userFld;
@@ -330,14 +334,12 @@ var passCreator = {
         }
         userFld = userFld || userHidden;
         if (!userFld) {
-            throw {name: "PasswordError",
-                   message: "error_detect_user"};
+            this.raiseError("PasswordError", "error_detect_user");
         }
-
         if (!userFld.value) {
             this.markField(userFld, true);
             userFld.focus();
-            throw {name: "LoginError", message: "error_empty_user"};
+            this.raiseError("LoginError", "error_empty_user");
         }
         this.log("user=" + userFld.value);
         this.markField(userFld);
@@ -483,7 +485,17 @@ var passCreator = {
         this._errorDiv.style.display = "none";
     },
 
-    alert: function(msg) {
+    raiseError: function(name, msgId, fatal) {
+        throw {
+            name: name,
+            message: this.getMessage(msgId) || msgId,
+            retry: !fatal
+        };
+    },
+
+    handleError: function(e, context) {
+        var msg = e.message || "NO_MSG";
+        this.log("exception happened(" + context + "): " + msg);
         alert(msg);
     },
 

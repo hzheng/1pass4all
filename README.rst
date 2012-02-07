@@ -62,14 +62,28 @@ even simpler, he can just insert a single space before the master password
 (the only risk is 1pass4all might guess the wrong username). 
 More generally, the password syntax is(bracketed terms are optional): ::
 
-    [user ]master_password[ pass_len][ *hash_iteration][ +salt]
+    [user ]master_password[ pass_len][ *hash_iteration][ +salt][ !cmd]
 
 where ``master_password``'s length is at least 6, 
 generated password's length ``pass_len`` is less than 100, 
-``hash_iteration`` is a positive integer.
+``hash_iteration`` indicates the hash iteration times,
+``salt`` is a `cryptographic salt <http://en.wikipedia.org/wiki/Salt_(cryptography)>`_,
+and ``cmd`` is an extra command(currently any nonempty command means "disable auto-submit").
 
-.. note:: In a password-change or sign-up page with multiple password fields,
-          ``1pass4all`` will disable username auto-detection and form auto-submit.
+1pass4all will pop up a form(and therefore disable auto-submit)
+in one of the following cases:
+
+- In a page (typically for password-change or sign-up) with multiple password fields.
+  In this case, clicking on the bookmarklet will take effect on the focused
+  (or the first) password field. In addition, username auto-detection is disabled.
+
+- Password contains a command(refer to the above password syntax).
+
+- A page with no password fields.
+ 
+- A page does have password field, but fails to be detected for some reason.
+
+- Some unexpected error happened.
 
 Disclaimer 
 ----------
