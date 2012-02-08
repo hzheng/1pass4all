@@ -17,7 +17,8 @@ var onePassForAll_mobile = {
         labelCss: "float: left; text-align: left; margin-left: 6px;" +
             "padding: 2px 8px;" +
             "font: bold 1em arial,verdana,sans-serif",
-        inputCss: "width: 40%; border: none;" +
+        fldCss: "overflow: hidden;",
+        inputCss: "width: 100%; border: none;" +
             "margin: 3px 2px; padding: 2px",
         buttonCss: "background: #999; color: #FFFFFF; font-size: 1.2em;" +
             "margin-top: 8px; padding: 2px 0; border: 1px solid silver;" +

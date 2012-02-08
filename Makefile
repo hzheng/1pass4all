@@ -1,9 +1,9 @@
 APP = 1pass4all
-VERSION = 0.2.0
+VERSION = 0.2.1
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
 TIME := $(shell date +%Y_%m%d_%H%M)
-PUBLISHED_TIME := 2012_0208_1836
+PUBLISHED_TIME := 2012_0208_2243
 DYNAMIC_SALT := $(shell base64 < /dev/urandom | tr / - | head -c 32)
 FIXED_SALT = 9rjixtK35p091K2glFZWDgueRFqmSNfX
 SALT = $(DYNAMIC_SALT)

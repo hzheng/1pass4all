@@ -89,17 +89,17 @@
                 // passCreator tests
                 module("passCreator");
                 test("password-generation test", 3, function() {
-                    equal(passCreator.generate("abc123", "file", 12, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+                    equal(passCreator.generate("abc123", "file", "", 12, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
                         "=v1r6k7#!D\\<", "password(local)");
-                    equal(passCreator.generate("abc123", "fileloginname", 25, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+                    equal(passCreator.generate("abc123", "file", "loginname", 25, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
                         "rqgu0R~j*K2tTeWx;J_47%4zy", "password with login(local)");
-                    equal(passCreator.generate("password", "googleuser", 20, 499, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+                    equal(passCreator.generate("password", "google", "user", 20, 499, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
                         "f&x[#&h@Ocx\"]LZ<Mx7e", "password with login(on google)");
                 });
 
                 // onePassForAll tests
                 module("onePassForAll");
-                test("domain test", 8, function() {
+                test("domain test", 10, function() {
                     equal(getDomain("mail.google.com"), "google", "gmail");
                     equal(getDomain("yahoo.com"), "yahoo", "yahoo.com");
                     equal(getDomain("yahoo.com.cn"), "yahoo", "yahoo.com.cn");
@@ -108,6 +108,8 @@
                     equal(getDomain("henrietta.liswa.wa.gov.au"), "liswa", "domain(with subdomain) of wa.gov.au");
                     equal(getDomain("henrietta.liswa.wb.gov.au"), "wb", "domain of gov.au");
                     equal(getDomain("sudomain.abc.政府.hk"), "abc", "Chinese domain");
+                    equal(getDomain("abc.xxxx"), null, "nonexistence tld");
+                    equal(getDomain("abc"), null, "not dot");
                 });
                 test("password-syntax test", 10, function() {
                     deepEqual(onePassForAll.parsePwdValue("masterpass"),
