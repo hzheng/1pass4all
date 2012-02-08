@@ -8,6 +8,7 @@
         <script type="text/javascript" src="http://code.jquery.com/qunit/git/qunit.js"></script>
         <script type="text/javascript" src="../src/hasher.js"></script>
         <script type="text/javascript" src="../src/passCreator.js"></script>
+        <script type="text/javascript" src="../src/1pass4all.js"></script>
 
         <script>
             $(document).ready(function(){
@@ -87,6 +88,17 @@
 
                 // passCreator tests
                 module("passCreator");
+                test("password-generation test", 3, function() {
+                    equal(passCreator.generate("abc123", "file", 12, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+                        "=v1r6k7#!D\\<", "password(local)");
+                    equal(passCreator.generate("abc123", "fileloginname", 25, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+                        "rqgu0R~j*K2tTeWx;J_47%4zy", "password with login(local)");
+                    equal(passCreator.generate("password", "googleuser", 20, 499, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+                        "f&x[#&h@Ocx\"]LZ<Mx7e", "password with login(on google)");
+                });
+
+                // onePassForAll tests
+                module("onePassForAll");
                 test("domain test", 8, function() {
                     equal(getDomain("mail.google.com"), "google", "gmail");
                     equal(getDomain("yahoo.com"), "yahoo", "yahoo.com");
@@ -98,44 +110,36 @@
                     equal(getDomain("sudomain.abc.政府.hk"), "abc", "Chinese domain");
                 });
                 test("password-syntax test", 10, function() {
-                    deepEqual(passCreator.parsePwdValue("masterpass"),
+                    deepEqual(onePassForAll.parsePwdValue("masterpass"),
                     {user: null, pass: "masterpass", passLen: 0,
                         iteration: 0, salt: "", cmd: ""}, "simplest password");
-                    deepEqual(passCreator.parsePwdValue(" masterpass", true),
+                    deepEqual(onePassForAll.parsePwdValue(" masterpass", true),
                     {user: "", pass: "masterpass", passLen: 0,
                         iteration: 0, salt: "", cmd: ""}, "password with empty user");
-                    deepEqual(passCreator.parsePwdValue("login masterpass"),
+                    deepEqual(onePassForAll.parsePwdValue("login masterpass"),
                     {user: "login", pass: "masterpass", passLen: 0,
                         iteration: 0, salt: "", cmd: ""}, "password with user");
-                    deepEqual(passCreator.parsePwdValue("login masterpass 20"),
+                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20"),
                     {user: "login", pass: "masterpass", passLen: "20",
                         iteration: 0, salt: "", cmd: ""}, "normal password");
-                    deepEqual(passCreator.parsePwdValue("login masterpass 20 *100"),
+                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100"),
                     {user: "login", pass: "masterpass", passLen: "20",
                         iteration: "100", salt: "", cmd: ""}, "password without salt and cmd");
-                    deepEqual(passCreator.parsePwdValue("login masterpass 20 *100 +salt"),
+                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100 +salt"),
                     {user: "login", pass: "masterpass", passLen: "20",
                         iteration: "100", salt: "salt", cmd: ""}, "password without cmd");
-                    deepEqual(passCreator.parsePwdValue("login masterpass 20 *100 +salt !command"),
+                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100 +salt !command"),
                     {user: "login", pass: "masterpass", passLen: "20",
                         iteration: "100", salt: "salt", cmd: "command"}, "full password");
-                    raises(function() {passCreator.parsePwdValue("login pass");},
+                    raises(function() {onePassForAll.parsePwdValue("login pass");},
                         function(e) {return e.name == "SyntaxError";},
                         "invalid password: password too short");
-                    raises(function() {passCreator.parsePwdValue("login masterpass 100");},
+                    raises(function() {onePassForAll.parsePwdValue("login masterpass 100");},
                         function(e) {return e.name == "SyntaxError";},
                         "invalid password: passLen too large");
-                    raises(function() {passCreator.parsePwdValue("login masterpass *1a");},
+                    raises(function() {onePassForAll.parsePwdValue("login masterpass *1a");},
                         function(e) {return e.name == "SyntaxError";},
                         "invalid password: iteration non-digit");
-                });
-                test("password-generation test", 3, function() {
-                    equal(passCreator.generate("abc123", "file", 12, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
-                        "=v1r6k7#!D\\<", "password(local)");
-                    equal(passCreator.generate("abc123", "fileloginname", 25, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
-                        "rqgu0R~j*K2tTeWx;J_47%4zy", "password with login(local)");
-                    equal(passCreator.generate("password", "googleuser", 20, 499, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
-                        "f&x[#&h@Ocx\"]LZ<Mx7e", "password with login(on google)");
                 });
             });
         </script>
