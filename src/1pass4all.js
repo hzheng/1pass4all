@@ -2,11 +2,10 @@
  * 1pass4all's bookmarklet version(need installation)
  */
 
-// password syntax
-var PASS_SYNTAX = "[user ]master_password[ pass_len][ *hash_iteration][ +salt]"; 
-var PASS_REGEX = /^(([^ ]*) +)?([^ ]{6,})( +(\d{1,2}))?( +\*(\d+))?( +\+([^ ]+))?( +!([^ ]*))?$/;
-
 var onePassForAll = {
+    PASS_SYNTAX: "[user ]master_password[ pass_len][ *hash_iteration][ +salt]",
+    PASS_REGEX: /^(([^ ]*) +)?([^ ]{6,})( +(\d{1,2}))?( +\*(\d+))?( +\+([^ ]+))?( +!([^ ]*))?$/,
+
     /** Main function */
     main: function(settings) {
         extend(passCreator.settings, settings);
@@ -114,10 +113,17 @@ var onePassForAll = {
             }
         }
         if (pwdFlds.length === 0) {
-            if (focused && focused.type == "password") { 
-                // last chance(no form)
-                pwdFlds = [fld];
-            } else {
+            // some passwords may be not contained in a form
+            this._form = null;
+            inputs = doc.getElementsByTagName("input");
+            for (j = 0; j < inputs.length; ++j) {
+                fld = inputs[j];
+                if (fld.type == "password" && isVisible(fld)) {
+                    pwdFlds.push(fld);
+                }
+            }
+            // no luck
+            if (pwdFlds.length === 0) {
                 log("password field not found");
                 return;
             }
@@ -133,10 +139,10 @@ var onePassForAll = {
             pwdFld = pwdFlds[0];
         }
         var pwd = pwdFld.value;
-        if (!pwd) {
+        if (!pwd || pwd.length < passCreator.MIN_MASTER_PASS_LEN) {
             this.markField(pwdFld, true);
             pwdFld.focus();
-            this.raiseError("PasswordError", "error_empty_pass");
+            this.raiseError("SyntaxError", "error_masterpass_too_short");
         } 
  
         this._pwdFlds = pwdFlds;
@@ -145,7 +151,7 @@ var onePassForAll = {
     },
 
     parsePwdValue: function(pwd, noAutoDetect) {
-        var groups = PASS_REGEX.exec(pwd);
+        var groups = this.PASS_REGEX.exec(pwd);
         if (!groups) {
             this.raiseError("SyntaxError", "error_pass_syntax");
         }
@@ -252,12 +258,12 @@ messages.add({
     error_pass_syntax: {
         en: "Password format error. \n" +
             "The correct format is(bracketed terms are optional):\n" +
-            PASS_SYNTAX + "\n\n" +
+            onePassForAll.PASS_SYNTAX + "\n\n" +
             "where the length of master_password is at least 6,\n" +
             "the length of generated password pass_len is a positive integer less than 100,\n" +
             "hash_iteration is a positive integer.",
         zh: "密码格式错误。正确格式为（[]内为可选项）：\n" +
-            PASS_SYNTAX + "\n\n" +
+            onePassForAll.PASS_SYNTAX + "\n\n" +
             "其中主密码master_password长度不小于6位\n" +
             "生成密码长度pass_len是一个小于100的正整数,\n" +
             "hash迭代次数hash_iteration是一个正整数。"

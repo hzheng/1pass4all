@@ -240,6 +240,7 @@ var passCreator = {
     // constants
     PANEL_ID: "onePassForAll",
     FLD_CLASS: "fld",
+    MIN_MASTER_PASS_LEN: 6,
     MIN_PASS_LEN: 8,
     MAX_PASS_LEN: 26,
     VALID_PASS_RETRY: 100,
@@ -414,7 +415,7 @@ var passCreator = {
             }
         }
         var masterPwd = this._masterPassField.value;
-        if (masterPwd.length < 6) {
+        if (masterPwd.length < this.MIN_MASTER_PASS_LEN) {
             this.showMessage('error_masterpass_too_short');
             return;
         }
