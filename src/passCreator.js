@@ -4,7 +4,9 @@
 
 var app = {
     name: "1Pass4All",
-    version: "0.1x" // will be updated by make
+    // the following may be modified by Makefile
+    version: "0.2.x",
+    homeUrl: "http://hzheng.github.com/1pass4all"
 };
 var debug = true; // will be turned off by make
 
@@ -101,7 +103,11 @@ function setStyles(e, styles) {
 function setAttributes(e, attrs) {
     for (var i in attrs) {
         if (attrs.hasOwnProperty(i)) {
-            e.setAttribute(i, attrs[i]);
+            if (i == "className") {
+                e.className = attrs[i];
+            } else {
+                e.setAttribute(i, attrs[i]);
+            }
         }
     }
 }
@@ -109,7 +115,7 @@ function setAttributes(e, attrs) {
 function createElement(tagName, parent, htm, styles, attrs) {
     var el = tagName || "div";
     if (attrs && ("type" in attrs) && document.all) { // IE cannot change type
-        el = "<" + el + " type=" + attrs.type + "/>";
+        el = "<" + el + " type=" + attrs.type + ">";
         delete attrs.type;
     }
     var e = document.createElement(el);
@@ -174,8 +180,12 @@ var messages = {
             zh: "盐（salt）："
         },
         label_result: {
-            en: "Acutual password:",
+            en: "Actual password:",
             zh: "实际密码："
+        },
+        info_generating: {
+            en: "generating password...",
+            zh: "正在生成密码…"
         },
         error_no_domain: {
             en: "No domain found",
@@ -228,7 +238,7 @@ var messages = {
 // password generator
 var passCreator = {
     // constants
-    PANEL_ID: "_1pass4all",
+    PANEL_ID: "onePassForAll",
     FLD_CLASS: "fld",
     MIN_PASS_LEN: 8,
     MAX_PASS_LEN: 26,
@@ -291,20 +301,27 @@ var passCreator = {
     },
 
     createInput: function(container, attrs) {
-        var wrapper = createElement(null, container);
-        wrapper.className = this.FLD_CLASS;
+        var wrapper = createElement(null, container, null, null,
+                {className: this.FLD_CLASS});
         return createElement('input', wrapper, null, null, attrs);
+    },
+
+    contextCss: function(selector, cssText) {
+        return cssText ?
+            "#" + this.PANEL_ID + " " + selector + "{" + cssText + "}" :
+            "";
     },
 
     createPasswordPanel: function(container, settings, pwdValues) {
         var isBookmarkelet = (arguments.length > 2);
-        var cssText = "#" + this.PANEL_ID + " {" + settings.panelCss + "}";
-        cssText += "#" + this.PANEL_ID + " label{" + settings.labelCss + "}";
-        cssText += "#" + this.PANEL_ID + " ." + this.FLD_CLASS +
-            "{" + settings.fldCss + "}";
-        cssText += "#" + this.PANEL_ID + " input{" + settings.inputCss + "}";
-        cssText += "#" + this.PANEL_ID + " button{" + settings.buttonCss + "}";
+        var cssText = this.contextCss("", settings.panelCss);
+        cssText += this.contextCss("label", settings.labelCss);
+        cssText += this.contextCss("." + this.FLD_CLASS, settings.fldCss);
+        cssText += this.contextCss("input", settings.inputCss);
+        cssText += this.contextCss("select", settings.selectCss);
+        cssText += this.contextCss("button", settings.buttonCss);
         addCss(cssText);
+
         var panel = createElement(null, container, null, null, {id: this.PANEL_ID});
         this._panel = panel;
         if (isBookmarkelet) {
@@ -316,6 +333,8 @@ var passCreator = {
             var moreBtn = createElement('a', titleBar, "+", settings.topBtnStyle);
             this._moreBtn = moreBtn;
             moreBtn.onclick = this._toggleMore.bind(this);
+            var helpBtn = createElement('a', titleBar, "?", settings.topBtnStyle);
+            helpBtn.onclick = function(){window.open(app.homeUrl, '_blank');};
             clearFloat(titleBar);
         }
         var inputRegion = createElement('div', panel, null, settings.inputRegionStyle);
@@ -360,12 +379,8 @@ var passCreator = {
                 settings.clearBtnStyle);
         clearBtn.onclick = this._clearPass.bind(this);
         clearFloat(cmdDiv);
-        var resultDiv = createElement('div', panel, null, settings.resultDivStyle);
-        this._resultDiv = resultDiv;
-        createElement('label', resultDiv, messages.get('label_result'));
-        this._genPassField = createElement('input', resultDiv, null, 
-                settings.genpassStyle, {readonly: "true"});
-        this._errorDiv = createElement('div', panel, null, settings.errorDivStyle);
+        this._resultDiv = createElement('div', panel, null, settings.resultDivStyle);
+        this._msgDiv = createElement('div', panel, null, settings.msgDivStyle);
     },
 
     _toggleMore: function() {
@@ -388,47 +403,52 @@ var passCreator = {
     _genPass: function() {
         var domain = this._domainField.value;
         if (!domain) {
-            this.showError('error_empty_domain');
+            this.showMessage('error_empty_domain');
             return;
         }
         if (domain.indexOf(".") >= 0) {
             domain = getDomain(domain);
             if (!domain) {
-                this.showError('error_invalid_domain');
+                this.showMessage('error_invalid_domain');
                 return;
             }
         }
         var masterPwd = this._masterPassField.value;
         if (masterPwd.length < 6) {
-            this.showError('error_masterpass_too_short');
+            this.showMessage('error_masterpass_too_short');
             return;
         }
         var iteration = this._iterationField.value;
         if (isNaN(iteration)) {
-            this.showError('error_iteration_not_number');
+            this.showMessage('error_iteration_not_number');
             return;
         }
 
-        this.hideError();
-        this._genPassField.value = this.generate(masterPwd,
-                domain, this._userField.value, this._passLenSelect.value,
-                parseInt(iteration, 10), this._saltField.value);
-        this._resultDiv.style.display = "block";
+        this.showMessage("info_generating");
+        var that = this;
+        setTimeout(function() { // make sure to display the message 
+            var result = that.generate(masterPwd,
+                domain, that._userField.value, that._passLenSelect.value,
+                parseInt(iteration, 10), that._saltField.value);
+            that.showResult(result);
+        }, 1);
     },
 
     _clearPass: function() {
-        this._genPassField.value = "";
+        this._resultDiv.innerHTML = "";
         this._resultDiv.style.display = "none";
     },
 
-    showError: function(msgId) {
-        this._resultDiv.style.display = "none";
-        this._errorDiv.innerHTML = messages.get(msgId);
-        this._errorDiv.style.display = "block";
+    showResult: function(result) {
+        this._msgDiv.style.display = "none";
+        this._resultDiv.innerHTML = result;
+        this._resultDiv.style.display = "block";
     },
 
-    hideError: function() {
-        this._errorDiv.style.display = "none";
+    showMessage: function(msgId) {
+        this._resultDiv.style.display = "none";
+        this._msgDiv.innerHTML = messages.get(msgId);
+        this._msgDiv.style.display = "block";
     },
 
     // customizable settings

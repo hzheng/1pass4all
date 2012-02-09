@@ -1,9 +1,8 @@
 APP = 1pass4all
-VERSION = 0.2.1
+VERSION = 0.2.2
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
 TIME := $(shell date +%Y_%m%d_%H%M)
-PUBLISHED_TIME := 2012_0208_2243
 DYNAMIC_SALT := $(shell base64 < /dev/urandom | tr / - | head -c 32)
 FIXED_SALT = 9rjixtK35p091K2glFZWDgueRFqmSNfX
 SALT = $(DYNAMIC_SALT)
@@ -21,13 +20,14 @@ INSTALL_SRC = $(BASIC_SRC) $(SRC_DIR)/1pass4all.js
 MOBILE_SRC = $(BASIC_SRC) $(SRC_DIR)/1pass4all_mobile.js
 COMPILED_INSTALL_JS = $(BUILD_DIR)/compiled_install.js
 COMPILED_MOBILE_JS = $(BUILD_DIR)/compiled_mobile.js
+INSTALL_BOOKMARKLET = $(APP).js
 INSTALL_SCRIPT_NAME = $(APP_TITLE).js
 MOBILE_SCRIPT_NAME = $(APP_TITLE)_mobile.js
 ENCODED_JS = $(BUILD_DIR)/encoded.js
 INSTALL_TPL = $(TPL_DIR)/install.html
 MOBILE_TPL = $(TPL_DIR)/mobile.html
 BOOKMARK_URL = $(BUILD_DIR)/bookmark.url
-SCRIPT_URL = http:\/\/hzheng.github.com\/$(APP)\/archive\/$(PUBLISHED_TIME)\/$(INSTALL_SCRIPT_NAME)
+SCRIPT_URL = http:\/\/hzheng.github.com\/$(APP)\/archive\/$(INSTALL_BOOKMARKLET)
 APP_HOME_URL = http:\/\/hzheng.github.com\/$(APP)
 INSTALL_HTM = $(BUILD_DIR)/install.html
 MOBILE_HTM = $(BUILD_DIR)/mobile.html
@@ -42,6 +42,7 @@ init:
 $(COMPILED_INSTALL_JS): $(INSTALL_SRC)
 	@echo "compiling $^ to $@ (salt: $(SALT))"
 	@sed -e 's/\(version: "\).*"/\1$(VERSION)"/' -e 's/\(debug = \)true/\10/' \
+	     -e 's/\(homeUrl: "\).*"/\1$(APP_HOME_URL)"/' \
 		 -e 's/\(passLen: \)[0-9]*,/\1$(PASS_LEN),/' \
 		 -e 's/\(iteration: \)[0-9]*,/\1$(ITERATION),/' \
 		 -e 's/\(salt: "\).*"/\1$(SALT)"/' $^ \
@@ -58,7 +59,7 @@ $(COMPILED_MOBILE_JS): $(MOBILE_SRC)
 $(RESULT_INSTALL_JS): $(COMPILED_INSTALL_JS)
 	@echo "generating wrapped script(bookmarklet):" $@
 	@(echo "(function(){" | cat - $<; echo "})();") > $@
-	@cp $@ $(RESULT_DIR)/
+	@cp $@ $(RESULT_DIR)/$(INSTALL_BOOKMARKLET)
 
 $(RESULT_MOBILE_JS): $(COMPILED_MOBILE_JS)
 	@echo "generating wrapped script(mobile):" $@

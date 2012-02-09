@@ -237,15 +237,13 @@ var onePassForAll = {
         topBtnStyle: {cssFloat: "right", cursor: "pointer",
             padding: "1px 6px",
             color: "#5B657A", font: "normal 14px tahoma,arial,sans-serif"},
-        inputRegionStyle: {},
         advancedDivStyle: {width: "100%", display: "none"},
         cmdDivStyle: {width: "75%", margin: "8px auto"},
         genBtnStyle: {cssFloat: "left"},
         clearBtnStyle: {cssFloat: "right"},
-        resultDivStyle: {width: "100%", display: "none"},
-        genpassStyle: {background: "transparent", color: "red",
-            border: "0", 'font-weight': "bold"},
-        errorDivStyle: {margin: "0 auto", width: "60%", font: "normal 10pt arial",
+        resultDivStyle: {width: "100%", 'text-align': "center", font: "normal 10pt arial",
+            color: "green", display: "none"},
+        msgDivStyle: {width: "100%", 'text-align': "center", font: "normal 10pt arial",
             color: "red", display: "none"}
     }
 };

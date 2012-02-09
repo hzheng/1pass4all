@@ -3,7 +3,7 @@
  */
 
 var onePassForAll_mobile = {
-    WRAPPER_ID: "_1pass4all_wrapper",
+    WRAPPER_ID: "onePassForAll_wrapper",
 
     /** Main function */
     main: function() {
@@ -20,7 +20,8 @@ var onePassForAll_mobile = {
         fldCss: "overflow: hidden;",
         inputCss: "width: 100%; border: none;" +
             "margin: 3px 2px; padding: 2px",
-        buttonCss: "background: #999; color: #FFFFFF; font-size: 1.2em;" +
+        selectCss: "margin: 3px 2px; padding: 2px",
+        buttonCss: "background: #79A4D0; color: #FFFFFF; font-size: 1.2em;" +
             "margin-top: 8px; padding: 2px 0; border: 1px solid silver;" +
             "-moz-border-radius: 5px; -webkit-border-radius: 5px;" +
             "border-radius: 5px; -khtml-border-radius: 5px",
@@ -33,10 +34,9 @@ var onePassForAll_mobile = {
         cmdDivStyle: {width: "100%", margin: "2px auto"},
         genBtnStyle: {width: "100%"},
         clearBtnStyle: {display: "none"},
-        resultDivStyle: {width: "100%", display: "none"},
-        genpassStyle: {background: "transparent", color: "red",
-            border: "0", 'font-weight': "bold"},
-        errorDivStyle: {margin: "0 auto", width: "60%", font: "normal 10pt arial",
+        resultDivStyle: {width: "100%", 'text-align': "center", font: "normal 10pt arial",
+            color: "green", display: "none"},
+        msgDivStyle: {width: "100%", 'text-align': "center", font: "normal 10pt arial",
             color: "red", display: "none"}
     }
 };
