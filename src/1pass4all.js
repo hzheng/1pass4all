@@ -179,11 +179,12 @@ var onePassForAll = {
                 if (fld == this._pwdFld) {
                     pwdFldFound = true;
                 } else if (pwdFldFound) {
+                    var isShown = isVisible(fld);
                     // only look for the fields BEFORE the password field
-                    if (fld.type == "text" && isVisible(fld)) {
+                    if (fld.type == "text" && isShown) {
                         userFld = fld;
                         break;
-                    } else if (fld.type == "hidden" &&
+                    } else if ((fld.type == "hidden" || !isShown)  &&
                             /(email|username|login)$/i.test(fld.name)) {
                         userHidden = fld;
                     } else {
@@ -226,22 +227,27 @@ var onePassForAll = {
             "margin: auto; padding: 6px 2px; border: 2px outset;" +
             "-moz-border-radius: 10px; -webkit-border-radius: 10px;" +
             "border-radius: 10px; -khtml-border-radius: 10px;",
-        labelCss: "float: left; width: 40%; margin-right: 6px;" +
-            "padding-top: 2px; text-align: right;" +
+        labelCss: "float: left; width: 40%; margin: 0 6px 0 0;" +
+            "padding: 2px 1px; text-align: right;" +
             "font: normal 10pt arial,verdana,sans-serif",
-        inputCss: "width: 55%; margin: 3px 2px;",
+        fldCss: "overflow: hidden; width: 55%",
+        inputCss: "width: 100%; margin: 3px 2px; padding: 2px;" +
+            "border: none;" +
+            "background: #FFF;",
+        selectCss: "width: 55%; margin: 3px 2px; padding: 2px",
         buttonCss: "background: #7182A4; color: #FFFFFF;" +
-            "margin: 2px; border: 0px;" +
+            "margin: 2px; border: 0px; padding: 2px 6px;" +
+            "font: normal 9pt arial;" +
             "-moz-border-radius: 8px; -webkit-border-radius: 8px;" +
             "border-radius: 8px; -khtml-border-radius: 8px",
         titleBarStyle: {width: "100%", 
             color: "#1E1F21", 'background-color': "transparent",
             borderBottom: "2px inset #CACED6",
             marginBottom: "6px", padding: "0"},
-        titleStyle: {width: "70%", padding: "1px 2px",
+        titleStyle: {width: "70%", padding: "1px 2px", margin: "1px",
             font: "bold 12pt serif"},
         topBtnStyle: {cssFloat: "right", cursor: "pointer",
-            padding: "1px 6px",
+            padding: "1px 6px", border: "none",
             color: "#5B657A", font: "normal 14px tahoma,arial,sans-serif"},
         advancedDivStyle: {width: "100%", display: "none"},
         cmdDivStyle: {width: "75%", margin: "8px auto"},

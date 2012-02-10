@@ -283,7 +283,8 @@ var passCreator = {
         }
         masterPwd += (salt || this.settings.salt || "");
         log("salted master pass: " + masterPwd);
-        var info = this._getInfo(domain.toLowerCase(), user.toLowerCase());
+        var info = this._getInfo(domain.toLowerCase(), 
+                user ? user.toLowerCase() : "");
         info = hasher.sha224In94(info);
         log("hashed info: " + info);
 

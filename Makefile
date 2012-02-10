@@ -1,5 +1,5 @@
 APP = 1pass4all
-VERSION = 0.2.2b
+VERSION = 0.2.2c
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
 TIME := $(shell date +%Y_%m%d_%H%M)
