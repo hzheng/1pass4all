@@ -39,7 +39,7 @@ function getDomain(url) {
     var tlds = TLD_LIST.join("|").replace(/\./g, "\\.");
     url = url || location.hostname;
     var domain = new RegExp("\\.?([^\\.]+)\\.(" + tlds + ")$").exec(url);
-    return domain && domain[1] || null;
+    return domain ? domain[1] : null;
 }
 
 function extend(destProps, srcProps) {
@@ -241,9 +241,12 @@ var passCreator = {
     PANEL_ID: "onePassForAll",
     FLD_CLASS: "fld",
     MIN_MASTER_PASS_LEN: 6,
-    MIN_PASS_LEN: 8,
+    MIN_PASS_LEN: 6,
     MAX_PASS_LEN: 26,
     VALID_PASS_RETRY: 100,
+
+    /** mobile version or not? */
+    isMobile: false,
 
     /** Validate password */
     validate: function(pwd) {
@@ -280,7 +283,7 @@ var passCreator = {
         }
         masterPwd += (salt || this.settings.salt || "");
         log("salted master pass: " + masterPwd);
-        var info = this._getInfo(domain.toLowerCase(), user);
+        var info = this._getInfo(domain.toLowerCase(), user.toLowerCase());
         info = hasher.sha224In94(info);
         log("hashed info: " + info);
 
@@ -314,7 +317,6 @@ var passCreator = {
     },
 
     createPasswordPanel: function(container, settings, pwdValues) {
-        var isBookmarkelet = (arguments.length > 2);
         var cssText = this.contextCss("", settings.panelCss);
         cssText += this.contextCss("label", settings.labelCss);
         cssText += this.contextCss("." + this.FLD_CLASS, settings.fldCss);
@@ -325,7 +327,7 @@ var passCreator = {
 
         var panel = createElement(null, container, null, null, {id: this.PANEL_ID});
         this._panel = panel;
-        if (isBookmarkelet) {
+        if (!this.isMobile) {
             var titleBar = createElement('div', panel, null, settings.titleBarStyle);
             // add title text and close button
             createElement('span', titleBar, this.settings.title, settings.titleStyle);
@@ -380,8 +382,13 @@ var passCreator = {
                 settings.clearBtnStyle);
         clearBtn.onclick = this._clearPass.bind(this);
         clearFloat(cmdDiv);
-        this._resultDiv = createElement('div', panel, null, settings.resultDivStyle);
         this._msgDiv = createElement('div', panel, null, settings.msgDivStyle);
+        this._msgFld = createElement('input', this._msgDiv, null,
+                settings.msgFldStyle, {readonly: "true"});
+        this._resultDiv = createElement('div', panel, null, settings.resultDivStyle);
+        this._resultFld = createElement('input', this._resultDiv, null,
+                settings.resultFldStyle,
+                this.isMobile ? null : {readonly: "true"});
     },
 
     _toggleMore: function() {
@@ -436,19 +443,19 @@ var passCreator = {
     },
 
     _clearPass: function() {
-        this._resultDiv.innerHTML = "";
+        this._resultFld.value = "";
         this._resultDiv.style.display = "none";
     },
 
     showResult: function(result) {
         this._msgDiv.style.display = "none";
-        this._resultDiv.innerHTML = result;
+        this._resultFld.value = result;
         this._resultDiv.style.display = "block";
     },
 
     showMessage: function(msgId) {
         this._resultDiv.style.display = "none";
-        this._msgDiv.innerHTML = messages.get(msgId);
+        this._msgFld.value = messages.get(msgId);
         this._msgDiv.style.display = "block";
     },
 

@@ -7,6 +7,7 @@ var onePassForAll_mobile = {
 
     /** Main function */
     main: function() {
+        passCreator.isMobile = true;
         this._wrapper = document.getElementById(this.WRAPPER_ID);
         this._panel = passCreator.createPasswordPanel(this._wrapper, this.settings);
     },
@@ -34,10 +35,12 @@ var onePassForAll_mobile = {
         cmdDivStyle: {width: "100%", margin: "2px auto"},
         genBtnStyle: {width: "100%"},
         clearBtnStyle: {display: "none"},
-        resultDivStyle: {width: "100%", 'text-align': "center", font: "normal 10pt arial",
-            color: "green", display: "none"},
-        msgDivStyle: {width: "100%", 'text-align': "center", font: "normal 10pt arial",
-            color: "red", display: "none"}
+        msgDivStyle: {width: "100%", 'text-align': "center", 
+            font: "normal 10pt arial", display: "none"},
+        msgFldStyle: {color: "red", background: "transparent", border: "none", 'text-align': "center"},
+        resultDivStyle: {width: "100%", 'text-align': "center", 
+            font: "normal 10pt arial", display: "none"},
+        resultFldStyle: {color: "green", background: "transparent", border: "none", 'text-align': "center"}
     }
 };
 

@@ -68,7 +68,8 @@ where ``master_password``'s length is at least 6,
 generated password's length ``pass_len`` is less than 100, 
 ``hash_iteration`` indicates the hash iteration times,
 ``salt`` is a `cryptographic salt <http://en.wikipedia.org/wiki/Salt_(cryptography)>`_,
-and ``cmd`` is an extra command(currently any nonempty command means "disable auto-submit").
+and ``cmd`` is an extra command(currently only supports one command: ``p``, 
+which will disable auto-submit).
 
 1pass4all will pop up a form(and therefore disable auto-submit)
 in one of the following cases:

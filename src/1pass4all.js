@@ -59,7 +59,7 @@ var onePassForAll = {
         this.markField(this._pwdFld);
         autoSubmit &= (this._form && (this._pwdFlds.length == 1));
         var cmd = pwdValues.cmd;
-        autoSubmit &= (cmd === ""); // currently, any command means no-autoSubmit
+        autoSubmit &= (cmd.indexOf("p") < 0); // command 'p' means prompt
         if (autoSubmit) {
             log("submitting");
             this._form.submit();
@@ -247,10 +247,12 @@ var onePassForAll = {
         cmdDivStyle: {width: "75%", margin: "8px auto"},
         genBtnStyle: {cssFloat: "left"},
         clearBtnStyle: {cssFloat: "right"},
-        resultDivStyle: {width: "100%", 'text-align': "center", font: "normal 10pt arial",
-            color: "green", display: "none"},
-        msgDivStyle: {width: "100%", 'text-align': "center", font: "normal 10pt arial",
-            color: "red", display: "none"}
+        msgDivStyle: {width: "100%", 'text-align': "center", 
+            font: "normal 10pt arial", display: "none"},
+        msgFldStyle: {color: "red", background: "transparent", border: "none", 'text-align': "center"},
+        resultDivStyle: {width: "100%", 'text-align': "center", 
+            font: "normal 10pt arial", display: "none"},
+        resultFldStyle: {color: "green", background: "transparent", border: "none", 'text-align': "center"}
     }
 };
 
