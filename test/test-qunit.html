@@ -111,28 +111,32 @@
                     equal(getDomain("abc.xxxx"), null, "nonexistence tld");
                     equal(getDomain("abc"), null, "not dot");
                 });
-                test("password-syntax test", 10, function() {
+                test("password-syntax test", 11, function() {
                     deepEqual(onePassForAll.parsePwdValue("masterpass"),
-                    {user: null, pass: "masterpass", passLen: 0,
+                    {user: null, pass: "masterpass", passLen: 0, domain: "",
                         iteration: 0, salt: "", cmd: ""}, "simplest password");
-                    deepEqual(onePassForAll.parsePwdValue(" masterpass", true),
-                    {user: "", pass: "masterpass", passLen: 0,
+                    deepEqual(onePassForAll.parsePwdValue(" masterpass"),
+                    {user: "", pass: "masterpass", passLen: 0, domain: "",
                         iteration: 0, salt: "", cmd: ""}, "password with empty user");
                     deepEqual(onePassForAll.parsePwdValue("login masterpass"),
-                    {user: "login", pass: "masterpass", passLen: 0,
+                    {user: "login", pass: "masterpass", passLen: 0, domain: "",
                         iteration: 0, salt: "", cmd: ""}, "password with user");
                     deepEqual(onePassForAll.parsePwdValue("login masterpass 20"),
-                    {user: "login", pass: "masterpass", passLen: "20",
+                    {user: "login", pass: "masterpass", passLen: "20", domain: "",
                         iteration: 0, salt: "", cmd: ""}, "normal password");
                     deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100"),
-                    {user: "login", pass: "masterpass", passLen: "20",
+                    {user: "login", pass: "masterpass", passLen: "20", domain: "",
                         iteration: "100", salt: "", cmd: ""}, "password without salt and cmd");
                     deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100 +salt"),
-                    {user: "login", pass: "masterpass", passLen: "20",
+                    {user: "login", pass: "masterpass", passLen: "20", domain: "",
                         iteration: "100", salt: "salt", cmd: ""}, "password without cmd");
                     deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100 +salt !command"),
-                    {user: "login", pass: "masterpass", passLen: "20",
+                    {user: "login", pass: "masterpass", passLen: "20", domain: "",
                         iteration: "100", salt: "salt", cmd: "command"}, "full password");
+                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20 @mydomain *100 +salt !command"),
+                    {user: "login", pass: "masterpass", passLen: "20", domain: "mydomain",
+                        iteration: "100", salt: "salt", cmd: "command"},
+                    "full password with domain");
                     raises(function() {onePassForAll.parsePwdValue("login pass");},
                         function(e) {return e.name == "SyntaxError";},
                         "invalid password: password too short");

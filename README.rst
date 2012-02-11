@@ -44,11 +44,12 @@ follow the instructions there.
 Or, simple check the ``install`` part on `project page <http://hzheng.github.com/1pass4all/>`_.
 
 
-.. warning:: For security reason, each run of ``make`` generates different
-             random salts even on the same machine, which means the result
-             bookmarklets are *NOT* compatible. 
-             To keep the bookmarklets compatible, you should make sure
-             they come from the same main version and the salts are exactly the same.
+.. warning:: For security reason, please be advised to use a salt different
+             from the default one. 
+             You can modify the salt either by editing the Makefile or 
+             making change on installation page.
+             Also be sure all the bookmarklets installed on different browsers
+             or machines have the same salt, or they are **NOT** compatible.
  
 Usage
 -----
@@ -62,13 +63,13 @@ even simpler, he can just insert a single space before the master password
 (the only risk is 1pass4all might guess the wrong username). 
 More generally, the password syntax is(bracketed terms are optional): ::
 
-    [user ]master_password[ pass_len][ *hash_iteration][ +salt][ !cmd]
+    [user ]master_password[ pass_len][ @domain][ *hash_iteration][ +salt][ !cmd]
 
 where ``master_password``'s length is at least 6, 
 generated password's length ``pass_len`` is less than 100, 
 ``hash_iteration`` indicates the hash iteration times,
 ``salt`` is a `cryptographic salt <http://en.wikipedia.org/wiki/Salt_(cryptography)>`_,
-and ``cmd`` is an extra command(currently only supports one command: ``p``, 
+and ``cmd`` are extra commands(currently only supports one command: ``p``, 
 which will disable auto-submit).
 
 1pass4all will pop up a form(and therefore disable auto-submit)

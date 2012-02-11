@@ -112,6 +112,16 @@ function setAttributes(e, attrs) {
     }
 }
 
+function addEvent(e, eventType, handler) {
+    if (e.addEventListener) {
+       e.addEventListener(eventType, handler, true);
+    } else if (e.attachEvent) {
+       e.attachEvent("on" + eventType, handler);
+    } else {
+       e["on" + eventType] = handler;
+    }
+}
+
 function createElement(tagName, parent, htm, styles, attrs) {
     var el = tagName || "div";
     if (attrs && ("type" in attrs) && document.all) { // IE cannot change type
@@ -308,7 +318,15 @@ var passCreator = {
     createInput: function(container, attrs) {
         var wrapper = createElement(null, container, null, null,
                 {className: this.FLD_CLASS});
-        return createElement('input', wrapper, null, null, attrs);
+        var input = createElement('input', wrapper, null, null, attrs);
+        var that = this;
+        addEvent(input, "keypress", function(evt) {
+                evt = evt || window.event;
+                if (evt.keyCode == 13) {
+                    that._genPass();
+                }
+            });
+        return input;
     },
 
     contextCss: function(selector, cssText) {

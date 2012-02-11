@@ -3,21 +3,21 @@
  */
 
 var onePassForAll = {
-    PASS_SYNTAX: "[user ]master_password[ pass_len][ *hash_iteration][ +salt]",
-    PASS_REGEX: /^(([^ ]*) +)?([^ ]{6,})( +(\d{1,2}))?( +\*(\d+))?( +\+([^ ]+))?( +!([^ ]*))?$/,
+    PASS_SYNTAX: "[user ]master_password[ pass_len][ @domain][ *hash_iteration][ +salt][ !cmd]",
+    PASS_REGEX: /^(([^ ]*) +)?([^ ]{6,})( +(\d{1,2}))?( +@([^ ]+))?( +\*(\d+))?( +\+([^ ]+))?( +!([^ ]*))?$/,
 
     /** Main function */
     main: function(settings) {
         extend(passCreator.settings, settings);
         try {
-            var result = this._autofill();
+            var pwdValues = this._autofill();
         } catch (e) {
             handleError(e, "autofill");
             if (e.retry) {return;}
         }
         try {
-            if (!result || !result[0]) { // no auto-submit
-                this._showPasswordPanel(result && result[1]);
+            if (!pwdValues || !this._autoSubmit) {
+                this._showPasswordPanel(pwdValues);
             }
         } catch (e2) {
             handleError(e2, "showPanel");
@@ -38,11 +38,11 @@ var onePassForAll = {
 
     _autofill: function() {
         var domain = getDomain();
-        var autoSubmit = this.settings.autoSubmit;
+        this._autoSubmit = this.settings.autoSubmit;
         if (!domain) {
             if (location.href.indexOf("file://") === 0) {
                 domain = "file"; // local
-                autoSubmit = false;
+                this._autoSubmit = false;
             }
             else {
                 this.raiseError("DomainError", "error_no_domain", true);
@@ -50,21 +50,22 @@ var onePassForAll = {
         }
 
         var pwdValues = this._checkPasswordFields();
-        if (!pwdValues) {return [false, null];}
+        if (!pwdValues) {return null;}
  
-        pwdValues.domain = domain;
-        var pwd = passCreator.generate(pwdValues.pass, domain, pwdValues.user,
+        if (!pwdValues.domain) {
+            pwdValues.domain = domain;
+        }
+        var pwd = passCreator.generate(pwdValues.pass, pwdValues.domain, pwdValues.user,
                 pwdValues.passLen, pwdValues.iteration, pwdValues.salt);
         this._pwdFld.value = pwd;
         this.markField(this._pwdFld);
-        autoSubmit &= (this._form && (this._pwdFlds.length == 1));
         var cmd = pwdValues.cmd;
-        autoSubmit &= (cmd.indexOf("p") < 0); // command 'p' means prompt
-        if (autoSubmit) {
+        this._autoSubmit &= (cmd.indexOf("p") < 0); // command 'p' means prompt
+        if (this._autoSubmit) {
             log("submitting");
             this._form.submit();
         }
-        return [autoSubmit, pwdValues];
+        return pwdValues;
     },
 
     _getDocument: function(doc) {
@@ -109,6 +110,7 @@ var onePassForAll = {
                     // unless the later one's password field is focused
                     this._form = form;
                     pwdFlds = [fld];
+                    break;
                 }
             }
         }
@@ -119,12 +121,14 @@ var onePassForAll = {
             for (j = 0; j < inputs.length; ++j) {
                 fld = inputs[j];
                 if (fld.type == "password" && isVisible(fld)) {
+                    log("found a password outside any form");
                     pwdFlds.push(fld);
                 }
             }
             // no luck
             if (pwdFlds.length === 0) {
                 log("password field not found");
+                this._autoSubmit = false;
                 return;
             }
         } 
@@ -145,31 +149,48 @@ var onePassForAll = {
             this.raiseError("SyntaxError", "error_masterpass_too_short");
         } 
  
-        this._pwdFlds = pwdFlds;
         this._pwdFld = pwdFld;
-        return this.parsePwdValue(pwd);
+        var singlePwdFld = (this._countPwdFlds(this._form) == 1);
+        this._autoSubmit &= singlePwdFld;
+        return this.parsePwdValue(pwd, true, singlePwdFld);
     },
 
-    parsePwdValue: function(pwd, noAutoDetect) {
+    _countPwdFlds: function(form) {
+        if (!form) {return 0;}
+
+        var inputs = form.elements;
+        var nPwdFlds = 0;
+        for (var i = inputs.length - 1; i >= 0; --i) {
+            var fld = inputs[i];
+            if (fld.type == "password" && isVisible(fld)) {
+                ++nPwdFlds;
+            }
+        }
+        log("password field's count: " + nPwdFlds);
+        return nPwdFlds;
+    },
+
+    parsePwdValue: function(pwd, autoDetect, singlePwdFld) {
+        log("parsing " + pwd);
         var groups = this.PASS_REGEX.exec(pwd);
         if (!groups) {
             this.raiseError("SyntaxError", "error_pass_syntax");
         }
 
         var user = groups[1] ? groups[2] : null;
-        if (user === "" && !noAutoDetect) { // autodetect user
-            user = this._findUsername();
+        if (user === "" && autoDetect) { // autodetect user
+            if (singlePwdFld) {
+                user = this._findUsername();
+            } else {
+                this.raiseError("PasswordError", "error_detect_user_with_multipwd");
+            }
         }
         return {user: user, pass: groups[3], passLen: groups[5] || 0,
-                iteration: groups[7] || 0, salt: groups[9] || "", cmd: groups[11] || ""};
+                domain: groups[7] || "", iteration: groups[9] || 0,
+                salt: groups[11] || "", cmd: groups[13] || ""};
     },
 
     _findUsername: function() {
-        // ask for autodetect username
-        if (this._pwdFlds.length > 1) {
-            this.raiseError("PasswordError", "error_detect_user_with_multipwd");
-        }
-
         var userFld;
         var userHidden; // candidate(useful for websites like gmail, yahoo mail)
         if (this._form) {
@@ -267,14 +288,16 @@ messages.add({
         en: "Password format error. \n" +
             "The correct format is(bracketed terms are optional):\n" +
             onePassForAll.PASS_SYNTAX + "\n\n" +
-            "where the length of master_password is at least 6,\n" +
-            "the length of generated password pass_len is a positive integer less than 100,\n" +
-            "hash_iteration is a positive integer.",
+            "where master_password's length is at least 6,\n" +
+            "the generated password's length pass_len is a positive integer less than 100,\n" +
+            "hash_iteration is a positive integer,\n" +
+            "cmd are extra commands(e.g. command p: disable auto-submit)",
         zh: "密码格式错误。正确格式为（[]内为可选项）：\n" +
             onePassForAll.PASS_SYNTAX + "\n\n" +
-            "其中主密码master_password长度不小于6位\n" +
-            "生成密码长度pass_len是一个小于100的正整数,\n" +
-            "hash迭代次数hash_iteration是一个正整数。"
+            "其中主密码master_password长度不小于6位，\n" +
+            "生成密码长度pass_len是一个小于100的正整数，\n" +
+            "hash迭代次数hash_iteration是一个正整数，\n" +
+            "cmd是其他命令（如命令p表示禁止自动提交）。"
     },
     error_detect_user_with_multipwd: {
         en: 

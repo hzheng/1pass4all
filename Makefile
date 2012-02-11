@@ -1,13 +1,11 @@
 APP = 1pass4all
-VERSION = 0.2.2c
+VERSION = 0.2.3
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
 TIME := $(shell date +%Y_%m%d_%H%M)
-DYNAMIC_SALT := $(shell base64 < /dev/urandom | tr / - | head -c 32)
-FIXED_SALT = 9rjixtK35p091K2glFZWDgueRFqmSNfX
-SALT = $(DYNAMIC_SALT)
-# uncomment the next line when you need a constant salt
-#SALT = $(FIXED_SALT)
+SALT = 9rjixtK35p091K2glFZWDgueRFqmSNfX
+# uncomment the next line if you need a refresh salt
+#SALT := $(shell base64 < /dev/urandom | tr / - | head -c 32)
 PASS_LEN = 10
 ITERATION = 100
 SRC_DIR = src
@@ -66,9 +64,10 @@ $(RESULT_MOBILE_JS): $(COMPILED_MOBILE_JS)
 	@(echo "(function(){" | cat - $<; echo "})();") > $@
 
 # Chrome and Safari 5 won't work for single percentage signs
+# Single quotes must be escaped
 $(ENCODED_JS): $(RESULT_INSTALL_JS)
 	@echo "generating encoded script:" $@
-	@sed -e 's/%/%25/g' $< > $@
+	@sed -e 's/%/%25/g' -e "s/'/%27/g" $< > $@
 
 $(INSTALL_HTM): $(ENCODED_JS) $(INSTALL_TPL)
 	@echo "generating installation page: " $@
