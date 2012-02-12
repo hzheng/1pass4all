@@ -7,8 +7,8 @@
         <h2>1pass4all (version $VERSION)</h2>
 
         <p>
-        <a href="http://hzheng.github.com/1pass4all">1pass4all</a> is 
-        a bookmarklet to create passwords easily and securely.
+            <a href="http://hzheng.github.com/1pass4all">1pass4all</a> is 
+            a bookmarklet to create passwords easily and securely.
         </p>
         <h3>Installation instructions:</h3>
         <p>
@@ -25,7 +25,7 @@
         </p>
  
         <p>
-            If you cannot or don't want to install bookmarket for some reason
+            If you cannot or don't want to install bookmarklet for some reason
             (e.g. on a mobile or on other's computer), please try the <a
                 href="mobile.html">mobile version</a>.
         </p>
@@ -53,29 +53,6 @@
             <a href="javascript:createSalt()">auto create</a><br/>
             <button onclick="changeSalt()">change salt</button>
         </p>
-        <script>
-            var saltInput = document.getElementById("salt");
-            function createSalt(size) {
-                // base64 characters
-                var chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/".split("");
-                var maxCharIndex = chars.length - 1;
-                var salts = [];
-                for (var i = size || 32; i > 0; --i) {
-                    salts.push(chars[Math.floor(Math.random() * maxCharIndex)]);
-                }
-                saltInput.value = salts.join("");
-            }
-
-            function changeSalt() {
-                var salt = saltInput.value.replace(/['"]/g, "");
-                var saltRegex = /(salt:")[^"]*"/;
-                var bookmarklet1 = document.getElementById("bookmarklet1");
-                bookmarklet1.href = bookmarklet1.href.replace(saltRegex, "$1" + salt + '"');
-                var bookmarklet2 = document.getElementById("bookmarklet2");
-                // Safari need unescape
-                bookmarklet2.href = unescape(bookmarklet2.href).replace(saltRegex, "$1" + salt + '"');
-            }
-        </script>
+        <script src="install.js" type="text/javascript"></script>
     </body>
 </html>
-

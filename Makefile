@@ -1,43 +1,55 @@
+### APP VARIABLES
 APP = 1pass4all
-VERSION = 0.2.3
+VERSION = 0.2.3a
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
+BOOKMARKLET_NAME = $(APP).js
 TIME := $(shell date +%Y_%m%d_%H%M)
+
+### PARAMETERS
 SALT = 9rjixtK35p091K2glFZWDgueRFqmSNfX
 # uncomment the next line if you need a refresh salt
 #SALT := $(shell base64 < /dev/urandom | tr / - | head -c 32)
 PASS_LEN = 10
 ITERATION = 100
+SCRIPT_URL = http:\/\/hzheng.github.com\/$(APP)\/archive\/$(BOOKMARKLET_NAME)
+APP_HOME_URL = http:\/\/hzheng.github.com\/$(APP)
+
+### DIRECTORIES
 SRC_DIR = src
 LIB_DIR = lib
 TPL_DIR = template
 BUILD_DIR = build
-RESULT_DIR = $(BUILD_DIR)/$(TIME)
-BASIC_SRC = $(SRC_DIR)/hasher.js $(SRC_DIR)/passCreator.js
-INSTALL_SRC = $(BASIC_SRC) $(SRC_DIR)/1pass4all.js
-MOBILE_SRC = $(BASIC_SRC) $(SRC_DIR)/1pass4all_mobile.js
-COMPILED_INSTALL_JS = $(BUILD_DIR)/compiled_install.js
-COMPILED_MOBILE_JS = $(BUILD_DIR)/compiled_mobile.js
-INSTALL_BOOKMARKLET = $(APP).js
-INSTALL_SCRIPT_NAME = $(APP_TITLE).js
-MOBILE_SCRIPT_NAME = $(APP_TITLE)_mobile.js
-ENCODED_JS = $(BUILD_DIR)/encoded.js
-INSTALL_TPL = $(TPL_DIR)/install.html
-MOBILE_TPL = $(TPL_DIR)/mobile.html
-BOOKMARK_URL = $(BUILD_DIR)/bookmark.url
-SCRIPT_URL = http:\/\/hzheng.github.com\/$(APP)\/archive\/$(INSTALL_BOOKMARKLET)
-APP_HOME_URL = http:\/\/hzheng.github.com\/$(APP)
-INSTALL_HTM = $(BUILD_DIR)/install.html
-MOBILE_HTM = $(BUILD_DIR)/mobile.html
-RESULT_INSTALL_JS = $(BUILD_DIR)/$(INSTALL_SCRIPT_NAME)
-RESULT_MOBILE_JS = $(BUILD_DIR)/$(MOBILE_SCRIPT_NAME)
+#DIST_DIR = $(BUILD_DIR)/$(TIME)
+DIST_DIR = $(BUILD_DIR)/dist
 
-all: init $(INSTALL_HTM) $(MOBILE_HTM) $(BOOKMARK_URL)
+### SOURCES
+BASIC_SRC = $(SRC_DIR)/hasher.js $(SRC_DIR)/passCreator.js
+BOOKMARKLET_SRC = $(BASIC_SRC) $(SRC_DIR)/1pass4all.js
+MOBILE_SRC = $(BASIC_SRC) $(SRC_DIR)/1pass4all_mobile.js
+INSTALL_JS = $(SRC_DIR)/install.js
+INSTALL_TPL = $(TPL_DIR)/install.html
+INSTALL_ZH_TPL = $(TPL_DIR)/install_zh.html
+MOBILE_TPL = $(TPL_DIR)/mobile.html
+
+### BUILDS
+COMPILED_BOOKMARKLET_JS = $(BUILD_DIR)/compiled_bookmarklet.js
+COMPILED_MOBILE_JS = $(BUILD_DIR)/compiled_mobile.js
+ENCODED_JS = $(BUILD_DIR)/encoded.js
+BOOKMARK_URL = $(BUILD_DIR)/bookmark.url
+INSTALL_HTM = $(BUILD_DIR)/install.html
+INSTALL_ZH_HTM = $(BUILD_DIR)/install_zh.html
+MOBILE_HTM = $(BUILD_DIR)/mobile.html
+DIST_BOOKMARKLET_JS = $(BUILD_DIR)/$(APP_TITLE).js
+DIST_MOBILE_JS = $(BUILD_DIR)/$(APP_TITLE)_mobile.js
+
+### TARGETS
+all: init $(INSTALL_HTM) $(INSTALL_ZH_HTM) $(MOBILE_HTM) $(BOOKMARK_URL)
 
 init:
-	@mkdir -p $(RESULT_DIR)
+	@mkdir -p $(DIST_DIR)
 
-$(COMPILED_INSTALL_JS): $(INSTALL_SRC)
+$(COMPILED_BOOKMARKLET_JS): $(BOOKMARKLET_SRC)
 	@echo "compiling $^ to $@ (salt: $(SALT))"
 	@sed -e 's/\(version: "\).*"/\1$(VERSION)"/' -e 's/\(debug = \)true/\10/' \
 	     -e 's/\(homeUrl: "\).*"/\1$(APP_HOME_URL)"/' \
@@ -54,36 +66,42 @@ $(COMPILED_MOBILE_JS): $(MOBILE_SRC)
 		 -e 's/\(salt: "\).*"/\1$(SALT)"/' $^ \
 	 | java -jar $(LIB_DIR)/compiler.jar --js_output_file $@
 
-$(RESULT_INSTALL_JS): $(COMPILED_INSTALL_JS)
+$(DIST_BOOKMARKLET_JS): $(COMPILED_BOOKMARKLET_JS)
 	@echo "generating wrapped script(bookmarklet):" $@
 	@(echo "(function(){" | cat - $<; echo "})();") > $@
-	@cp $@ $(RESULT_DIR)/$(INSTALL_BOOKMARKLET)
+	@cp $@ $(DIST_DIR)/$(BOOKMARKLET_NAME)
 
-$(RESULT_MOBILE_JS): $(COMPILED_MOBILE_JS)
+$(DIST_MOBILE_JS): $(COMPILED_MOBILE_JS)
 	@echo "generating wrapped script(mobile):" $@
 	@(echo "(function(){" | cat - $<; echo "})();") > $@
 
 # Chrome and Safari 5 won't work for single percentage signs
 # Single quotes must be escaped
-$(ENCODED_JS): $(RESULT_INSTALL_JS)
+$(ENCODED_JS): $(DIST_BOOKMARKLET_JS)
 	@echo "generating encoded script:" $@
 	@sed -e 's/%/%25/g' -e "s/'/%27/g" $< > $@
 
-$(INSTALL_HTM): $(ENCODED_JS) $(INSTALL_TPL)
+$(INSTALL_HTM): $(ENCODED_JS) $(INSTALL_TPL) $(INSTALL_JS)
 	@echo "generating installation page: " $@
 	@sed -e 's/$$VERSION/$(VERSION)/'  -e 's/$$SALT/$(SALT)/' -e 's/$$SCRIPT_URL/$(SCRIPT_URL)/' $(INSTALL_TPL) \
 		| awk '{if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
-	@cp $@ $(RESULT_DIR)/
+	@cp $@ $(INSTALL_JS) $(DIST_DIR)/
 
-$(MOBILE_HTM): $(RESULT_MOBILE_JS) $(MOBILE_TPL)
+$(INSTALL_ZH_HTM): $(ENCODED_JS) $(INSTALL_ZH_TPL)
+	@echo "generating Chinese installation page: " $@
+	@sed -e 's/$$VERSION/$(VERSION)/'  -e 's/$$SALT/$(SALT)/' -e 's/$$SCRIPT_URL/$(SCRIPT_URL)/' $(INSTALL_ZH_TPL) \
+		| awk '{if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
+	@cp $@ $(DIST_DIR)/
+
+$(MOBILE_HTM): $(DIST_MOBILE_JS) $(MOBILE_TPL)
 	@echo "generating mobile page: " $@
 	@sed -e 's/$$VERSION/$(VERSION)/' -e 's/$$APP_HOME_URL/$(APP_HOME_URL)/' \
 		-e 's/$$SALT/$(SALT)/' -e 's/$$PASS_LEN/$(PASS_LEN)/' \
 		-e 's/$$ITERATION/$(ITERATION)/' $(MOBILE_TPL) \
 		| awk '{if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
-	@cp $@ $(RESULT_DIR)/
+	@cp $@ $(DIST_DIR)/
 
-$(BOOKMARK_URL): $(RESULT_INSTALL_JS)
+$(BOOKMARK_URL): $(DIST_BOOKMARKLET_JS)
 	@echo "generating bookmark url:" $@
 	@echo "javascript:" | cat - $< > $@
 
