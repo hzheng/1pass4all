@@ -1,6 +1,6 @@
 ### APP VARIABLES
 APP = 1pass4all
-VERSION = 0.2.3a
+VERSION = 0.2.3b
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
 BOOKMARKLET_NAME = $(APP).js
@@ -19,6 +19,7 @@ APP_HOME_URL = http:\/\/hzheng.github.com\/$(APP)
 SRC_DIR = src
 LIB_DIR = lib
 TPL_DIR = template
+RES_DIR = resources
 BUILD_DIR = build
 #DIST_DIR = $(BUILD_DIR)/$(TIME)
 DIST_DIR = $(BUILD_DIR)/dist
@@ -85,7 +86,7 @@ $(INSTALL_HTM): $(ENCODED_JS) $(INSTALL_TPL) $(INSTALL_JS)
 	@echo "generating installation page: " $@
 	@sed -e 's/$$VERSION/$(VERSION)/'  -e 's/$$SALT/$(SALT)/' -e 's/$$SCRIPT_URL/$(SCRIPT_URL)/' $(INSTALL_TPL) \
 		| awk '{if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
-	@cp $@ $(INSTALL_JS) $(DIST_DIR)/
+	@cp $@ $(INSTALL_JS) $(RES_DIR)/* $(DIST_DIR)/
 
 $(INSTALL_ZH_HTM): $(ENCODED_JS) $(INSTALL_ZH_TPL)
 	@echo "generating Chinese installation page: " $@

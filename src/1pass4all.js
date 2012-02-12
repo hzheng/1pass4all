@@ -16,7 +16,7 @@ var onePassForAll = {
             if (e.retry) {return;}
         }
         try {
-            if (!pwdValues || !this._autoSubmit) {
+            if (!this._autoSubmit) {
                 this._showPasswordPanel(pwdValues);
             }
         } catch (e2) {
@@ -50,7 +50,7 @@ var onePassForAll = {
         }
 
         var pwdValues = this._checkPasswordFields();
-        if (!pwdValues) {return null;}
+        if (!pwdValues) {return {domain: domain};}
  
         if (!pwdValues.domain) {
             pwdValues.domain = domain;
@@ -268,7 +268,7 @@ var onePassForAll = {
         titleStyle: {width: "70%", padding: "1px 2px", margin: "1px",
             font: "bold 12pt serif"},
         topBtnStyle: {cssFloat: "right", cursor: "pointer",
-            padding: "1px 6px", border: "none",
+            padding: "1px 6px", border: "none", "text-decoration": "none",
             color: "#5B657A", font: "normal 14px tahoma,arial,sans-serif"},
         advancedDivStyle: {width: "100%", display: "none"},
         cmdDivStyle: {width: "75%", margin: "8px auto"},
