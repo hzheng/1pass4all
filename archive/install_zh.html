@@ -1,19 +1,19 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <title>1pass4all's installation</title>
+        <title>1pass4all安装</title>
     </head>
     <body>
-        <h2>1pass4all (version 0.2.3a)</h2>
+        <h2>1pass4all (0.2.3a版)</h2>
 
         <p>
-            <a href="http://hzheng.github.com/1pass4all">1pass4all</a> is 
-            a bookmarklet to create passwords easily and securely.
+        <a href="http://hzheng.github.com/1pass4all">1pass4all</a>是
+        一个书签工具（bookmarklet），用于方便而安全地生成密码。
         </p>
-        <h3>Installation instructions:</h3>
+        <h3>安装指南：</h3>
         <p>
-            For browsers like Firefox, Chrome, Safari and Opera, we recommend you 
-            drag the link <a id="bookmarklet1" href='javascript: 
+            在Firefox、Chrome、Safari和Opera浏览器上，只需将链接
+            <a id="bookmarklet1" href='javascript: 
 (function(){
 function str2bin(a){for(var b=[],d=0,c=a.length<<3;d<c;d+=8)b[d>>5]|=(a.charCodeAt(d>>3)&255)<<24-(d&31);return b}function bin2hex(a){for(var b="",d=0,c=a.length<<2;d<c;++d)b+="0123456789abcdef".charAt(a[d>>2]>>(3-(d&3)<<3)+4&15),b+="0123456789abcdef".charAt(a[d>>2]>>(3-(d&3)<<3)&15);return b}function shortenBitBlock(a,b,d){for(var c=[],e=(1<<d)-1,f=a.length-1,g=b;0<g;g-=d){var h=a[f],i=d;g<d&&0<=--f&&(h|=(a[f]&(1<<d-g)-1)<<g,i-=g,g+=b);c.unshift(h&e);if(0>f)break;a[f]>>>=i}return c}
 function base94(a){a=shortenBitBlock(a,32,7);a=a.map(function(a){return 94>a?String.fromCharCode(33+a):""});return a.join("")}function add(a,b){return(a&2147483647)+(b&2147483647)^a&2147483648^b&2147483648}function rightRotate(a,b){return a>>>b|a<<32-b}if(!Array.prototype.map)Array.prototype.map=function(a,b){for(var d=[],c=b||window,e=0;e<this.length;++e)e in this&&(d[e]=a.call(c,this[e],e,this));return d};
@@ -56,43 +56,39 @@ onePassForAll.PASS_SYNTAX+"\n\n\u5176\u4e2d\u4e3b\u5bc6\u7801master_password\u95
 zh:"\u591a\u4e2a\u5bc6\u7801\u9879\u5b58\u5728\u65f6\u5c06\u5173\u95ed\u7528\u6237\u540d\u81ea\u52a8\u68c0\u67e5\uff0c\u8bf7\u5728\u5bc6\u7801\u4e2d\u7684\u5f00\u5934\u7a7a\u683c\u524d\u624b\u5de5\u8f93\u5165\u7528\u6237\u540d\uff0c\u6216\u53bb\u6389\u8be5\u7a7a\u683c\u4ee5\u5ffd\u7565\u7528\u6237\u540d\u3002"},error_detect_user:{en:"Sorry, cannot auto-detect username field. Please remove the leading white space from the password or manually type username before that white space.",zh:"\u62b1\u6b49\u65e0\u6cd5\u81ea\u52a8\u68c0\u67e5\u5230\u7528\u6237\u540d\uff0c\u8bf7\u53bb\u6389\u5bc6\u7801\u4e2d\u7684\u5f00\u5934\u7a7a\u683c\uff0c\u6216\u5728\u8be5\u7a7a\u683c\u524d\u624b\u5de5\u8f93\u5165\u7528\u6237\u540d\u3002"}});
 window.test&&debug?log("in unit test"):onePassForAll.main(window._1pass4all_settings);
 })();
-            '>1pass4all</a> to bookmarks bar, or right click it to add to your bookmarks.
+            '>1pass4all</a>直接拖至书签栏即可，或用鼠标右键加到书签中。
         </p>
 
         <p>
-            For Internet Explorer, whose bookmarklet(or favelet) has size limit,
-            you MUST instead drag this link
-            <a id="bookmarklet2" href='javascript:_1pass4all_settings={salt:"9rjixtK35p091K2glFZWDgueRFqmSNfX"};s=document.createElement("script");s.type="text/javascript";s.src="http://hzheng.github.com/1pass4all/archive/1pass4all.js";document.body.appendChild(s);void(0);'>1pass4all</a> to favorites bar.
+            但在IE浏览器中，则<strong>必须</strong>将链接
+            <a id="bookmarklet2" href='javascript:_1pass4all_settings={salt:"9rjixtK35p091K2glFZWDgueRFqmSNfX"};s=document.createElement("script");s.type="text/javascript";s.src="http://hzheng.github.com/1pass4all/archive/1pass4all.js";document.body.appendChild(s);void(0);'>1pass4all</a>加入收藏栏（favorites bar）。
         </p>
  
         <p>
-            If you cannot or don't want to install bookmarklet for some reason
-            (e.g. on a mobile or on other's computer), please try the <a
-                href="mobile.html">mobile version</a>.
+            如果您由于某种原因无法或不愿安装此工具（如在手机上或在他人的电脑上），
+            不妨试试<a href="mobile.html">移动版</a>。
         </p>
  
         <p>
-            An advanced user can check out the project on the master branch
-            (<code>git clone git://github.com/hzheng/1pass4all</code>),
-            then check the README file.
+            高级用户可从GitHub上检出该项目
+            （<code>git clone git://github.com/hzheng/1pass4all</code>），
+            然后阅读README。
         </p>
 
-        <h3>Note:</h3>
+        <h3>注：</h3>
         <p>
-            Before installation, you may change the 
-            <a href="http://en.wikipedia.org/wiki/Salt_(cryptography)">salt</a> for better security
-            (<em>ignore it if you have changed the salt in Makefile and
-                generated this page by make</em>).<br/>
-            You MUST make sure the bookmarklets installed on different browsers or machines have the same salt,
-            otherwise they are NOT compatible.
+            为了更安全，在安装前最好修改一下
+            <a href="http://en.wikipedia.org/wiki/Salt_(cryptography)">salt（盐）</a>
+            （若您已在Makefile中修改过并正是用make生成的该页面，则可忽略此注）。<br/>
+            请注意在不同的浏览器或机器上的盐必须相同，否则将互不兼容。
         </p>
         <p>
-            Old salt: <br/>
+            旧salt：<br/>
             <input size="64" readonly="true" value='9rjixtK35p091K2glFZWDgueRFqmSNfX'/><br/>
-            New salt(any random characters except quotes):<br/>
+            新salt（任意随机字符串，但引号'或"会被忽略）：<br/>
             <input id="salt" size="64" value=''/>
-            <a href="javascript:createSalt()">auto create</a><br/>
-            <button onclick="changeSalt()">change salt</button>
+            <a href="javascript:createSalt()">自动生成</a><br/>
+            <button onclick="changeSalt()">换salt</button>
         </p>
         <script src="install.js" type="text/javascript"></script>
     </body>
