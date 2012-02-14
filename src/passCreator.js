@@ -189,6 +189,26 @@ var messages = {
             en: "Salt:",
             zh: "盐（salt）："
         },
+        label_pass_base: {
+            en: "Password value:",
+            zh: "密码取值："
+        },
+        label_pass_base94: {
+            en: "any printable characters",
+            zh: "任意可打印字符"
+        },
+        label_pass_base64: {
+            en: "letters, numbers, + or /",
+            zh: "字母、数字以及+或/"
+        },
+        label_pass_base62: {
+            en: "letters and numbers",
+            zh: "字母和数字"
+        },
+        label_pass_base10: {
+            en: "numbers only",
+            zh: "只含数字"
+        },
         label_result: {
             en: "Actual password:",
             zh: "实际密码："
@@ -259,8 +279,10 @@ var passCreator = {
     isMobile: false,
 
     /** Validate password */
-    validate: function(pwd) {
+    validate: function(pwd, base) {
         log("validating password " + pwd);
+        if (base === "10") {return true;}
+
         if (!this._pwdPattern) {
             this._pwdPattern = new RegExp("^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).{" +
                     this.MIN_PASS_LEN + "," + this.MAX_PASS_LEN + "}$");
@@ -280,9 +302,17 @@ var passCreator = {
      * Generate password(the core function)
      * domain: the internet domain with TLD stripped
      */
-    generate: function(masterPwd, domain, user, len, iteration, salt) {
+    generate: function(pwdValues) {
+        var masterPwd = pwdValues.pass;
+        var domain = pwdValues.domain.toLowerCase();
+        var user = pwdValues.user ? pwdValues.user.toLowerCase() : "";
+        var len = pwdValues.passLen;
+        var iteration = pwdValues.iteration || this.settings.iteration;
+        var salt = pwdValues.salt;
+        var base = pwdValues.passBase || this.settings.passBase;
         log("pwd=" + masterPwd + ";domain=" + domain + ";user=" + user +
-                ";len=" + len + ";iteration=" + iteration + ";salt=" + salt);
+                ";len=" + len + ";iteration=" + iteration + ";salt=" + salt +
+                ";base=" + base);
         if (!len) {
             len = this.settings.passLen;
         }
@@ -293,23 +323,23 @@ var passCreator = {
         }
         masterPwd += (salt || this.settings.salt || "");
         log("salted master pass: " + masterPwd);
-        var info = this._getInfo(domain.toLowerCase(), 
-                user ? user.toLowerCase() : "");
+        var info = this._getInfo(domain, user); 
         info = hasher.sha224In94(info);
         log("hashed info: " + info);
 
         var pwd = "";
-        var hashTimes = iteration || this.settings.iteration;
-        log("hash " + hashTimes + " times...");
-        for (var i = hashTimes - 1; i > 0; --i) { // 1 hash remaining
+        log("pre-hash " + iteration + " times...");
+        for (var i = iteration - 1; i > 0; --i) { // 1 hash remaining
             pwd = hasher.hmacSha224In94(pwd + masterPwd, info);
         }
+        log("last round hash...");
+        var algo = "hmacSha224In" + base;
         for (var retry = 0; ; ++retry) {
-            pwd = hasher.hmacSha224In94(pwd + masterPwd, info);
+            pwd = hasher[algo](pwd + masterPwd, info);
             log("retry " + retry + "; generated pass len=" + pwd.length);
             var subPwd = pwd.substring(0, len);
             if ((retry > this.VALID_PASS_RETRY) ||
-                    (pwd.length >= len && this.validate(subPwd))) {
+                    (pwd.length >= len && this.validate(subPwd, "" + base))) {
                 return subPwd;
             }
         }
@@ -385,6 +415,20 @@ var passCreator = {
         clearFloat(inputRegion, settings.fldSepStyle);
         var advancedDiv = createElement('div', inputRegion, null, settings.advancedDivStyle); 
         this._advancedDiv = advancedDiv; 
+        createElement('label', advancedDiv, messages.get('label_pass_base'));
+        var passBaseSelect = createElement('select', advancedDiv);
+        this._passBaseSelect = passBaseSelect;
+        var passBase = pwdValues && pwdValues.passBase || this.settings.passBase;
+        var baseOpts = [94, 62, 64, 10];
+        for (i = 0; i < baseOpts.length; ++i) {
+            var base = baseOpts[i];
+            option = createElement('option', passBaseSelect, 
+                    messages.get("label_pass_base" + base), null, {value: base});
+            if (base == passBase) {
+                option.setAttribute('selected', "true");
+            }
+        }
+        clearFloat(advancedDiv, settings.fldSepStyle);
         createElement('label', advancedDiv, messages.get('label_iteration'));
         this._iterationField = this.createInput(advancedDiv, 
                 {value: pwdValues && pwdValues.iteration || this.settings.iteration});
@@ -454,9 +498,12 @@ var passCreator = {
         this.showMessage("info_generating");
         var that = this;
         setTimeout(function() { // make sure to display the message 
-            var result = that.generate(masterPwd,
-                domain, that._userField.value, that._passLenSelect.value,
-                parseInt(iteration, 10), that._saltField.value);
+            var result = that.generate({
+                pass: masterPwd, domain: domain,
+                user: that._userField.value, passLen: that._passLenSelect.value,
+                iteration: parseInt(iteration, 10), salt: that._saltField.value,
+                passBase: that._passBaseSelect.value
+            });
             that.showResult(result);
         }, 1);
     },
@@ -483,6 +530,7 @@ var passCreator = {
         title: app.name + " " + app.version,
         // the following may be modified by Makefile
         passLen: 10,
+        passBase: 94,
         iteration: 100,
         salt: "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"
     }

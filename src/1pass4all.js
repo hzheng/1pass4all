@@ -3,8 +3,8 @@
  */
 
 var onePassForAll = {
-    PASS_SYNTAX: "[user ]master_password[ pass_len][ @domain][ *hash_iteration][ +salt][ !cmd]",
-    PASS_REGEX: /^(([^ ]*) +)?([^ ]{6,})( +(\d{1,2}))?( +@([^ ]+))?( +\*(\d+))?( +\+([^ ]+))?( +!([^ ]*))?$/,
+    PASS_SYNTAX: "[user ]master_password[ pass_len][ @domain][ *hash_iteration][ +salt][ -options]",
+    PASS_REGEX: /^(([^ ]*) +)?([^ ]{6,})( +(\d{1,2}))?( +@([^ ]+))?( +\*(\d+))?( +\+([^ ]+))?( +-([^ ]+))?$/,
 
     /** Main function */
     main: function(settings) {
@@ -55,12 +55,10 @@ var onePassForAll = {
         if (!pwdValues.domain) {
             pwdValues.domain = domain;
         }
-        var pwd = passCreator.generate(pwdValues.pass, pwdValues.domain, pwdValues.user,
-                pwdValues.passLen, pwdValues.iteration, pwdValues.salt);
+        var pwd = passCreator.generate(pwdValues);
         this._pwdFld.value = pwd;
         this.markField(this._pwdFld);
-        var cmd = pwdValues.cmd;
-        this._autoSubmit &= (cmd.indexOf("p") < 0); // command 'p' means prompt
+        this._autoSubmit &= (pwdValues.autoSubmit !== false);
         if (this._autoSubmit) {
             log("submitting");
             this._form.submit();
@@ -185,9 +183,24 @@ var onePassForAll = {
                 this.raiseError("PasswordError", "error_detect_user_with_multipwd");
             }
         }
+        var base = null;
+        var autoSubmit = null;
+        var options = groups[13] || "";
+        for (var i = 0; i < options.length; ++i) {
+            switch (options[i]) {
+                case 'A': base = 64; break;
+                case '6': base = 64; break;
+                case 'a': base = 62; break;
+                case 'n': base = 10; break;
+                case 'p': autoSubmit = false; break;
+                default: this.raiseError("SyntaxError",
+                                 messages.get("error_option") + options[i]);
+            }
+        }
         return {user: user, pass: groups[3], passLen: groups[5] || 0,
                 domain: groups[7] || "", iteration: groups[9] || 0,
-                salt: groups[11] || "", cmd: groups[13] || ""};
+                salt: groups[11] || "", passBase: base,
+                autoSubmit: autoSubmit};
     },
 
     _findUsername: function() {
@@ -291,13 +304,13 @@ messages.add({
             "where master_password's length is at least 6,\n" +
             "the generated password's length pass_len is a positive integer less than 100,\n" +
             "hash_iteration is a positive integer,\n" +
-            "cmd are extra commands(e.g. command p: disable auto-submit)",
+            "options are other options(e.g. p: disable auto-submit)",
         zh: "密码格式错误。正确格式为（[]内为可选项）：\n" +
             onePassForAll.PASS_SYNTAX + "\n\n" +
             "其中主密码master_password长度不小于6位，\n" +
             "生成密码长度pass_len是一个小于100的正整数，\n" +
             "hash迭代次数hash_iteration是一个正整数，\n" +
-            "cmd是其他命令（如命令p表示禁止自动提交）。"
+            "options是其他选项（p表示禁止自动提交）。"
     },
     error_detect_user_with_multipwd: {
         en: 
@@ -307,6 +320,10 @@ messages.add({
         zh:
             "多个密码项存在时将关闭用户名自动检查，" +
             "请在密码中的开头空格前手工输入用户名，或去掉该空格以忽略用户名。"
+    },
+    error_option: {
+        en: "unknown option in password: -",
+        zh: "密码中有未知选项：-"
     },
     error_detect_user: {
         en: 

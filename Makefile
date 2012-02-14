@@ -1,6 +1,6 @@
 ### APP VARIABLES
 APP = 1pass4all
-VERSION = 0.2.3b
+VERSION = 0.2.4
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
 BOOKMARKLET_NAME = $(APP).js
@@ -11,6 +11,7 @@ SALT = 9rjixtK35p091K2glFZWDgueRFqmSNfX
 # uncomment the next line if you need a refresh salt
 #SALT := $(shell base64 < /dev/urandom | tr / - | head -c 32)
 PASS_LEN = 10
+PASS_BASE = 94
 ITERATION = 100
 SCRIPT_URL = http:\/\/hzheng.github.com\/$(APP)\/archive\/$(BOOKMARKLET_NAME)
 APP_HOME_URL = http:\/\/hzheng.github.com\/$(APP)
@@ -55,6 +56,7 @@ $(COMPILED_BOOKMARKLET_JS): $(BOOKMARKLET_SRC)
 	@sed -e 's/\(version: "\).*"/\1$(VERSION)"/' -e 's/\(debug = \)true/\10/' \
 	     -e 's/\(homeUrl: "\).*"/\1$(APP_HOME_URL)"/' \
 		 -e 's/\(passLen: \)[0-9]*,/\1$(PASS_LEN),/' \
+		 -e 's/\(passBase: \)[0-9]*,/\1$(PASS_BASE),/' \
 		 -e 's/\(iteration: \)[0-9]*,/\1$(ITERATION),/' \
 		 -e 's/\(salt: "\).*"/\1$(SALT)"/' $^ \
 	 | java -jar $(LIB_DIR)/compiler.jar --js_output_file $@
@@ -63,6 +65,7 @@ $(COMPILED_MOBILE_JS): $(MOBILE_SRC)
 	@echo "compiling $^ to $@ (salt: $(SALT))"
 	@sed -e 's/\(version: "\).*"/\1$(VERSION)"/' -e 's/\(debug = \)true/\10/' \
 		 -e 's/\(passLen: \)[0-9]*,/\1$(PASS_LEN),/' \
+		 -e 's/\(passBase: \)[0-9]*,/\1$(PASS_BASE),/' \
 		 -e 's/\(iteration: \)[0-9]*,/\1$(ITERATION),/' \
 		 -e 's/\(salt: "\).*"/\1$(SALT)"/' $^ \
 	 | java -jar $(LIB_DIR)/compiler.jar --js_output_file $@

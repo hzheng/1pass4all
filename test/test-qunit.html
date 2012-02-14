@@ -12,6 +12,18 @@
 
         <script>
             $(document).ready(function(){
+                // base64 tests
+                module("base64");
+                test("base64 test", 4, function() {
+                    equal(base64_str("abc"), "YWJj",
+                    "'abc'");
+                    equal(base64_str("message digest\n"), "bWVzc2FnZSBkaWdlc3QK",
+                    "'message digest', no padding");
+                    equal(base64_str("messagedigest\n"), "bWVzc2FnZWRpZ2VzdAo=",
+                    "'messagedigest', one padding");
+                    equal(base64_str("hG}Sa0a]?@"), "aEd9U2EwYV0/QA==",
+                    "'message digest', two paddings");
+                });
                 // SHA tests
                 module("SHA");
                 test("sha256 test", 4, function() {
@@ -23,7 +35,7 @@
                         "'message digest'");
                     equal(hasher.sha256InHex("messagedigest"),
                         "e5f0bf06957eba90051bfced251cbcfb084a2303e3752c2641e4dcb31d025dd9",
-                        "'mesagedigest'");
+                        "'messagedigest'");
                     equal(hasher.sha256InHex("The quick brown fox jumps over the lazy dog"),
                         "d7a8fbb307d7809469ca9abcb0082e4f8d5651e46d3cdb762d02d0bf37c9e592",
                         "'the quick brown...'");
@@ -89,11 +101,24 @@
                 // passCreator tests
                 module("passCreator");
                 test("password-generation test", 3, function() {
-                    equal(passCreator.generate("abc123", "file", "", 12, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+                    var pwdValues = {
+                        pass: "abc123", domain: "file", passLen: 12, iteration: 999,
+                        salt: "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"
+                    };
+                    equal(passCreator.generate(pwdValues),
                         "=v1r6k7#!D\\<", "password(local)");
-                    equal(passCreator.generate("abc123", "file", "loginname", 25, 999, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+
+                    pwdValues.user = "loginname";
+                    pwdValues.passLen = 25;
+                    equal(passCreator.generate(pwdValues),
                         "rqgu0R~j*K2tTeWx;J_47%4zy", "password with login(local)");
-                    equal(passCreator.generate("password", "google", "user", 20, 499, "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"),
+
+                    pwdValues.pass = "password";
+                    pwdValues.domain = "google";
+                    pwdValues.user = "user";
+                    pwdValues.passLen = 20;
+                    pwdValues.iteration = 499;
+                    equal(passCreator.generate(pwdValues),
                         "f&x[#&h@Ocx\"]LZ<Mx7e", "password with login(on google)");
                 });
 
@@ -111,32 +136,41 @@
                     equal(getDomain("abc.xxxx"), null, "nonexistence tld");
                     equal(getDomain("abc"), null, "not dot");
                 });
-                test("password-syntax test", 11, function() {
+                test("password-syntax test", 14, function() {
                     deepEqual(onePassForAll.parsePwdValue("masterpass"),
                     {user: null, pass: "masterpass", passLen: 0, domain: "",
-                        iteration: 0, salt: "", cmd: ""}, "simplest password");
+                        iteration: 0, salt: "", passBase: null, autoSubmit: null}, "simplest password");
                     deepEqual(onePassForAll.parsePwdValue(" masterpass"),
                     {user: "", pass: "masterpass", passLen: 0, domain: "",
-                        iteration: 0, salt: "", cmd: ""}, "password with empty user");
+                        iteration: 0, salt: "", passBase: null, autoSubmit: null}, "password with empty user");
                     deepEqual(onePassForAll.parsePwdValue("login masterpass"),
                     {user: "login", pass: "masterpass", passLen: 0, domain: "",
-                        iteration: 0, salt: "", cmd: ""}, "password with user");
+                        iteration: 0, salt: "", passBase: null, autoSubmit: null}, "password with user");
                     deepEqual(onePassForAll.parsePwdValue("login masterpass 20"),
                     {user: "login", pass: "masterpass", passLen: "20", domain: "",
-                        iteration: 0, salt: "", cmd: ""}, "normal password");
+                        iteration: 0, salt: "", passBase: null, autoSubmit: null}, "normal password");
                     deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100"),
                     {user: "login", pass: "masterpass", passLen: "20", domain: "",
-                        iteration: "100", salt: "", cmd: ""}, "password without salt and cmd");
+                        iteration: "100", salt: "", passBase: null, autoSubmit: null}, "password without salt and options");
                     deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100 +salt"),
                     {user: "login", pass: "masterpass", passLen: "20", domain: "",
-                        iteration: "100", salt: "salt", cmd: ""}, "password without cmd");
-                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100 +salt !command"),
+                        iteration: "100", salt: "salt", passBase: null, autoSubmit: null}, "password without options");
+                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100 +salt -a"),
                     {user: "login", pass: "masterpass", passLen: "20", domain: "",
-                        iteration: "100", salt: "salt", cmd: "command"}, "full password");
-                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20 @mydomain *100 +salt !command"),
+                        iteration: "100", salt: "salt", passBase: 62, autoSubmit: null}, "full password");
+                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20 *100 +salt -n"),
+                    {user: "login", pass: "masterpass", passLen: "20", domain: "",
+                        iteration: "100", salt: "salt", passBase: 10, autoSubmit: null}, "full password");
+                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20 @mydomain *100 +salt -p6"),
                     {user: "login", pass: "masterpass", passLen: "20", domain: "mydomain",
-                        iteration: "100", salt: "salt", cmd: "command"},
-                    "full password with domain");
+                        iteration: "100", salt: "salt", passBase: 64,
+                        autoSubmit: false},
+                    "full password with domain(disable autosubmit)");
+                    deepEqual(onePassForAll.parsePwdValue("login masterpass 20 @mydomain *100 +salt -p6n"),
+                    {user: "login", pass: "masterpass", passLen: "20", domain: "mydomain",
+                        iteration: "100", salt: "salt", passBase: 10,
+                        autoSubmit: false},
+                    "full password with domain(two pass bases, disable autosubmit)");
                     raises(function() {onePassForAll.parsePwdValue("login pass");},
                         function(e) {return e.name == "SyntaxError";},
                         "invalid password: password too short");
@@ -146,6 +180,9 @@
                     raises(function() {onePassForAll.parsePwdValue("login masterpass *1a");},
                         function(e) {return e.name == "SyntaxError";},
                         "invalid password: iteration non-digit");
+                    raises(function() {onePassForAll.parsePwdValue("login masterpass -x");},
+                        function(e) {return e.name == "SyntaxError";},
+                        "invalid options");
                 });
             });
         </script>

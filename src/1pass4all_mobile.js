@@ -14,7 +14,7 @@ var onePassForAll_mobile = {
 
     settings: {
         panelCss: "margin: 0px auto; width: 100%;" +
-            "padding: 4px 0px; background-color: #FFF;",
+            "padding: 2px 0px; background-color: #FFF;",
         labelCss: "float: left; text-align: left; margin-left: 6px;" +
             "padding: 2px 8px;" +
             "font: bold 1em arial,verdana,sans-serif",

@@ -34,7 +34,7 @@ Inspired by SuperGenPass, it offers some improvements as follows:
 
   To eliminate popup forms, 1pass4all provides a specialized password syntax
   to utilize advanced features
-  (e.g. username auto-detection, password-length/hash-iteration/salt customization).
+  (e.g. username auto-detection, password-length/hash-iteration/salt/base customization).
 
 Installation
 ------------
@@ -63,14 +63,19 @@ even simpler, he can just insert a single space before the master password
 (the only risk is 1pass4all might guess the wrong username). 
 More generally, the password syntax is(bracketed terms are optional): ::
 
-    [user ]master_password[ pass_len][ @domain][ *hash_iteration][ +salt][ !cmd]
+    [user ]master_password[ pass_len][ @domain][ *hash_iteration][ +salt][ -options]
 
 where ``master_password``'s length is at least 6, 
 generated password's length ``pass_len`` is less than 100, 
 ``hash_iteration`` indicates the hash iteration times,
 ``salt`` is a `cryptographic salt <http://en.wikipedia.org/wiki/Salt_(cryptography)>`_,
-and ``cmd`` are extra commands(currently only supports one command: ``p``, 
-which will disable auto-submit).
+and ``options`` are extra options::
+
+    p - prompt(i.e. disable auto-submit)
+    A - any printable password(default)
+    a - alphanumeric password
+    n - numeric password
+    6 - base64 password(alphanum plus + and /)
 
 1pass4all will pop up a form(and therefore disable auto-submit)
 in one of the following cases:
@@ -79,7 +84,7 @@ in one of the following cases:
   In this case, clicking on the bookmarklet will take effect on the focused
   (or the first) password field. In addition, username auto-detection is disabled.
 
-- Password contains a command(refer to the above password syntax).
+- Password contains a prompt option(refer to the above password syntax).
 
 - A page with no password fields.
  

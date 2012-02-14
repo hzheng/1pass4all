@@ -9,6 +9,7 @@
 
 // utilities
 /** Convert a string to binary format(i.e. array of big-endian 32-bit words).
+ *  The result is right padded with 0's.
  */
 function str2bin(str) {
     var bin = [];
@@ -31,12 +32,27 @@ function bin2hex(bin) {
 }
 
 /** Repack bit blocks from a larger unit to a small one.
+ *  Packing starts from the lower bits.
+ *  If pad is true, input will be right padded when necessary.
+ *  Note: input may be modified in the process.
  */
-function shortenBitBlock(bitBlocks, longBits, shortBits) {
+function shortenBitBlock(bitBlocks, longBits, shortBits, pad) {
+    if (pad) {
+        var gcd = function(a, b) {
+            return b === 0 ? a : gcd(b, a % b);
+        };
+        var modulo = shortBits / gcd(longBits, shortBits);
+        var leftover = bitBlocks.length % modulo;
+        if (leftover) {
+            for (var i = modulo - leftover; i > 0; --i) {
+                bitBlocks.push(0);
+            }
+        }
+    }
     var result = [];
     var mask = (1 << shortBits) - 1;
-    var index = bitBlocks.length - 1;
-    for (var bits = longBits; bits > 0; bits -= shortBits) {
+    var bits = longBits;
+    for (var index = bitBlocks.length - 1; index >= 0; ) {
         var n = bitBlocks[index];
         var shift = shortBits;
         if (bits < shortBits && --index >= 0) { // borrow from higher long-bit
@@ -47,17 +63,67 @@ function shortenBitBlock(bitBlocks, longBits, shortBits) {
         result.unshift(n & mask);
         if (index < 0) {break;}
         bitBlocks[index] >>>= shift;
+        bits -= shortBits;
+        if (bits <= 0) { // actually '==' is OK
+            --index;
+            bits += longBits;
+        }
     }
     return result;
 }
 
 /** Lossy base94: chop from 32-bit chunks into 7-bit chunks, whose value range
- * from 0 to 127, then filter out those larger than 94.
+ *  from 0 to 127, then filter out those larger than 94.
  */
-function base94(_32bitBlocks) {
-    var _7bitBlocks = shortenBitBlock(_32bitBlocks, 32, 7);
+function base94(_32bitBlocks, pad) {
+    var _7bitBlocks = shortenBitBlock(_32bitBlocks, 32, 7, pad);
     _7bitBlocks = _7bitBlocks.map(function(n) {return n < 94 ? String.fromCharCode(33 + n) : "";});
     return _7bitBlocks.join("");
+}
+
+/** Lossless base64: chop from 32-bit chunks into 6-bit chunks, then use
+ *  Base64 table. 
+ */
+function base64(_32bitBlocks, pad) {
+    var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    var _6bitBlocks = shortenBitBlock(_32bitBlocks, 32, 6, pad);
+    _6bitBlocks = _6bitBlocks.map(function(n) {return charSet[n];});
+    return _6bitBlocks.join("");
+}
+
+/** Standard Base64 algorithm. 
+ */
+function base64_str(str) {
+    var len = str.length;
+    var padding = "";
+    switch (len % 3) {
+        case 1: len += 2; padding = "=="; break;
+        case 2: len += 1; padding = "="; break;
+    }
+    var code = base64(str2bin(str), true);
+    // Or:
+    // for (var i = (96 - len * 8 % 96) / 8; i > 0; --i) {str += "\0";}
+    // var code = base64(str2bin(str), false);
+    return code.substring(0, len * 4 / 3 - padding.length) + padding;
+}
+
+/** Lossy base62: chop from 32-bit chunks into 6-bit chunks, then use
+ *  Base64 table excluding "+" and "/", namely, alphanumeric charset.
+ */
+function base62(_32bitBlocks, pad) {
+    var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var _6bitBlocks = shortenBitBlock(_32bitBlocks, 32, 6, pad);
+    _6bitBlocks = _6bitBlocks.map(function(n) {return n < 62 ? charSet[n] : "";});
+    return _6bitBlocks.join("");
+}
+
+/** Lossy base10: chop from 32-bit chunks into 4-bit chunks, whose value range
+ *  from 0 to 16, then filter out those larger than 10.
+ */
+function base10(_32bitBlocks, pad) {
+    var _4bitBlocks = shortenBitBlock(_32bitBlocks, 32, 4, pad);
+    _4bitBlocks = _4bitBlocks.map(function(n) {return n < 10 ? "" + n : "";});
+    return _4bitBlocks.join("");
 }
 
 /** 32-bit unsigned integer addition which handles overflow properly.
@@ -194,6 +260,18 @@ var hasher = {
 
     hmacSha256InHex: function(key, msg, is224) {
         return bin2hex(this.hmacSha256(key, msg, is224));
+    },
+
+    hmacSha224In10: function(key, msg) {
+        return base10(this.hmacSha256(key, msg, true), true);
+    },
+
+    hmacSha224In62: function(key, msg) {
+        return base62(this.hmacSha256(key, msg, true), true);
+    },
+
+    hmacSha224In64: function(key, msg) {
+        return base64(this.hmacSha256(key, msg, true), true);
     },
 
     hmacSha224In94: function(key, msg) {
