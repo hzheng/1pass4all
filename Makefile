@@ -1,6 +1,6 @@
 ### APP VARIABLES
 APP = 1pass4all
-VERSION = 0.2.4
+VERSION = 0.2.5
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
 BOOKMARKLET_NAME = $(APP).js
@@ -13,6 +13,8 @@ SALT = 9rjixtK35p091K2glFZWDgueRFqmSNfX
 PASS_LEN = 10
 PASS_BASE = 94
 ITERATION = 100
+# auto-submit(true or false)
+AUTO_SUBMIT = true
 SCRIPT_URL = http:\/\/hzheng.github.com\/$(APP)\/archive\/$(BOOKMARKLET_NAME)
 APP_HOME_URL = http:\/\/hzheng.github.com\/$(APP)
 
@@ -29,7 +31,7 @@ DIST_DIR = $(BUILD_DIR)/dist
 BASIC_SRC = $(SRC_DIR)/hasher.js $(SRC_DIR)/passCreator.js
 BOOKMARKLET_SRC = $(BASIC_SRC) $(SRC_DIR)/1pass4all.js
 MOBILE_SRC = $(BASIC_SRC) $(SRC_DIR)/1pass4all_mobile.js
-INSTALL_JS = $(SRC_DIR)/install.js
+INSTALL_RES = $(SRC_DIR)/install.js $(SRC_DIR)/install.css
 INSTALL_TPL = $(TPL_DIR)/install.html
 INSTALL_ZH_TPL = $(TPL_DIR)/install_zh.html
 MOBILE_TPL = $(TPL_DIR)/mobile.html
@@ -54,19 +56,20 @@ init:
 $(COMPILED_BOOKMARKLET_JS): $(BOOKMARKLET_SRC)
 	@echo "compiling $^ to $@ (salt: $(SALT))"
 	@sed -e 's/\(version: "\).*"/\1$(VERSION)"/' -e 's/\(debug = \)true/\10/' \
+	     -e 's/\(autoSubmit: "\).*"/\1$(AUTO_SUBMIT)"/' \
 	     -e 's/\(homeUrl: "\).*"/\1$(APP_HOME_URL)"/' \
-		 -e 's/\(passLen: \)[0-9]*,/\1$(PASS_LEN),/' \
-		 -e 's/\(passBase: \)[0-9]*,/\1$(PASS_BASE),/' \
-		 -e 's/\(iteration: \)[0-9]*,/\1$(ITERATION),/' \
+	     -e 's/\(passLen: "\).*"/\1$(PASS_LEN)"/' \
+	     -e 's/\(passBase: "\).*"/\1$(PASS_BASE)"/' \
+	     -e 's/\(iteration: "\).*"/\1$(ITERATION)"/' \
 		 -e 's/\(salt: "\).*"/\1$(SALT)"/' $^ \
 	 | java -jar $(LIB_DIR)/compiler.jar --js_output_file $@
 
 $(COMPILED_MOBILE_JS): $(MOBILE_SRC)
 	@echo "compiling $^ to $@ (salt: $(SALT))"
 	@sed -e 's/\(version: "\).*"/\1$(VERSION)"/' -e 's/\(debug = \)true/\10/' \
-		 -e 's/\(passLen: \)[0-9]*,/\1$(PASS_LEN),/' \
-		 -e 's/\(passBase: \)[0-9]*,/\1$(PASS_BASE),/' \
-		 -e 's/\(iteration: \)[0-9]*,/\1$(ITERATION),/' \
+	     -e 's/\(passLen: "\).*"/\1$(PASS_LEN)"/' \
+	     -e 's/\(passBase: "\).*"/\1$(PASS_BASE)"/' \
+	     -e 's/\(iteration: "\).*"/\1$(ITERATION)"/' \
 		 -e 's/\(salt: "\).*"/\1$(SALT)"/' $^ \
 	 | java -jar $(LIB_DIR)/compiler.jar --js_output_file $@
 
@@ -85,15 +88,21 @@ $(ENCODED_JS): $(DIST_BOOKMARKLET_JS)
 	@echo "generating encoded script:" $@
 	@sed -e 's/%/%25/g' -e "s/'/%27/g" $< > $@
 
-$(INSTALL_HTM): $(ENCODED_JS) $(INSTALL_TPL) $(INSTALL_JS)
+$(INSTALL_HTM): $(ENCODED_JS) $(INSTALL_TPL) $(INSTALL_RES)
 	@echo "generating installation page: " $@
-	@sed -e 's/$$VERSION/$(VERSION)/'  -e 's/$$SALT/$(SALT)/' -e 's/$$SCRIPT_URL/$(SCRIPT_URL)/' $(INSTALL_TPL) \
+	@sed -e 's/$$VERSION/$(VERSION)/' -e 's/$$SCRIPT_URL/$(SCRIPT_URL)/' \
+		 -e 's/$$SALT/$(SALT)/' -e 's/$$ITERATION/$(ITERATION)/' \
+		 -e 's/$$PASS_LEN/$(PASS_LEN)/' -e 's/$$PASS_BASE/$(PASS_BASE)/' \
+         -e 's/$$AUTO_SUBMIT/$(AUTO_SUBMIT)/' $(INSTALL_TPL) \
 		| awk '{if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
-	@cp $@ $(INSTALL_JS) $(RES_DIR)/* $(DIST_DIR)/
+	@cp $@ $(INSTALL_RES) $(RES_DIR)/* $(DIST_DIR)/
 
 $(INSTALL_ZH_HTM): $(ENCODED_JS) $(INSTALL_ZH_TPL)
 	@echo "generating Chinese installation page: " $@
-	@sed -e 's/$$VERSION/$(VERSION)/'  -e 's/$$SALT/$(SALT)/' -e 's/$$SCRIPT_URL/$(SCRIPT_URL)/' $(INSTALL_ZH_TPL) \
+	@sed -e 's/$$VERSION/$(VERSION)/' -e 's/$$SCRIPT_URL/$(SCRIPT_URL)/' \
+		 -e 's/$$SALT/$(SALT)/' -e 's/$$ITERATION/$(ITERATION)/' \
+		 -e 's/$$PASS_LEN/$(PASS_LEN)/' -e 's/$$PASS_BASE/$(PASS_BASE)/' \
+         -e 's/$$AUTO_SUBMIT/$(AUTO_SUBMIT)/' $(INSTALL_ZH_TPL) \
 		| awk '{if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
 	@cp $@ $(DIST_DIR)/
 

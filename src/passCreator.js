@@ -166,47 +166,47 @@ var messages = {
             zh: "清除密码"
         },
         label_domain: {
-            en: "Domain(*):",
-            zh: "域名（*）："
+            en: "Domain(*)",
+            zh: "域名（*）"
         },
         label_user: {
-            en: "Username:",
-            zh: "用户名："
+            en: "Username",
+            zh: "用户名"
         },
         label_master_pass: {
-            en: "Master password(*):",
-            zh: "主密码（*）："
+            en: "Master password(*)",
+            zh: "主密码（*）"
         },
         label_pass_len: {
-            en: "Password length:",
-            zh: "密码长度："
+            en: "Password length",
+            zh: "密码长度"
         },
         label_iteration: {
-            en: "Iteration:",
-            zh: "迭代次数："
+            en: "Iteration",
+            zh: "迭代次数"
         },
         label_salt: {
-            en: "Salt:",
-            zh: "盐（salt）："
+            en: "Salt",
+            zh: "盐（salt）"
         },
         label_pass_base: {
-            en: "Password value:",
-            zh: "密码取值："
+            en: "Password charset",
+            zh: "密码字符集"
         },
         label_pass_base94: {
-            en: "any printable characters",
-            zh: "任意可打印字符"
+            en: "printable characters",
+            zh: "所有可打印字符"
         },
         label_pass_base64: {
-            en: "letters, numbers, + or /",
-            zh: "字母、数字以及+或/"
+            en: "letters, digits, + and /",
+            zh: "字母、数字以及+和/"
         },
         label_pass_base62: {
-            en: "letters and numbers",
+            en: "letters and digits",
             zh: "字母和数字"
         },
         label_pass_base10: {
-            en: "numbers only",
+            en: "digits only",
             zh: "只含数字"
         },
         label_result: {
@@ -273,6 +273,7 @@ var passCreator = {
     MIN_MASTER_PASS_LEN: 6,
     MIN_PASS_LEN: 6,
     MAX_PASS_LEN: 26,
+    MAX_ITERATION: 9999,
     VALID_PASS_RETRY: 100,
 
     /** mobile version or not? */
@@ -307,7 +308,7 @@ var passCreator = {
         var domain = pwdValues.domain.toLowerCase();
         var user = pwdValues.user ? pwdValues.user.toLowerCase() : "";
         var len = pwdValues.passLen;
-        var iteration = pwdValues.iteration || this.settings.iteration;
+        var iteration = pwdValues.iteration || parseInt(this.settings.iteration, 10);
         var salt = pwdValues.salt;
         var base = pwdValues.passBase || this.settings.passBase;
         log("pwd=" + masterPwd + ";domain=" + domain + ";user=" + user +
@@ -328,8 +329,10 @@ var passCreator = {
         log("hashed info: " + info);
 
         var pwd = "";
-        log("pre-hash " + iteration + " times...");
-        for (var i = iteration - 1; i > 0; --i) { // 1 hash remaining
+
+        var preHashIteration = Math.min(iteration, this.MAX_ITERATION) - 1;
+        log("pre-hash " + preHashIteration + " times...");
+        for (var i = preHashIteration; i > 0; --i) { // 1 hash remaining
             pwd = hasher.hmacSha224In94(pwd + masterPwd, info);
         }
         log("last round hash...");
@@ -419,7 +422,7 @@ var passCreator = {
         var passBaseSelect = createElement('select', advancedDiv);
         this._passBaseSelect = passBaseSelect;
         var passBase = pwdValues && pwdValues.passBase || this.settings.passBase;
-        var baseOpts = [94, 62, 64, 10];
+        var baseOpts = [94, 64, 62, 10];
         for (i = 0; i < baseOpts.length; ++i) {
             var base = baseOpts[i];
             option = createElement('option', passBaseSelect, 
@@ -431,7 +434,8 @@ var passCreator = {
         clearFloat(advancedDiv, settings.fldSepStyle);
         createElement('label', advancedDiv, messages.get('label_iteration'));
         this._iterationField = this.createInput(advancedDiv, 
-                {value: pwdValues && pwdValues.iteration || this.settings.iteration});
+                {value: pwdValues && pwdValues.iteration || this.settings.iteration,
+                    maxlength: 4});
         clearFloat(advancedDiv, settings.fldSepStyle);
         createElement('label', advancedDiv, messages.get('label_salt'));
         this._saltField = this.createInput(advancedDiv, 
@@ -529,9 +533,9 @@ var passCreator = {
     settings: {
         title: app.name + " " + app.version,
         // the following may be modified by Makefile
-        passLen: 10,
-        passBase: 94,
-        iteration: 100,
+        passLen: "10",
+        passBase: "94",
+        iteration: "100",
         salt: "QMrxUarMQcNvW9n4MKtsM0hY5iNlzriO"
     }
 };

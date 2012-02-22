@@ -7,49 +7,16 @@ Introduction
 *1pass4all* is a bookmarklet to create passwords easily and securely.
 With the aid of it, a user can log on different websites with different passwords,
 while keeping only one master password (which is the ``1`` in ``1pass4all``) in mind.
-The best part is that one compromised passowrd will hardly impact other ones.
-Inspired by SuperGenPass, it offers some improvements as follows:
-
-- security:
-
-  1pass4all is based on algorithm HMAC-SHA224, which is more secure than MD5.
-  Besides, the result password is 94-base instead of 64-base, and 
-  password's maximal length is 26 instead of 24.
-  What's more, it supports customized salt and hash iteration.  
-
-  Unlike SuperGenPass, 1pass4all takes username into account,
-  which means the same master password on the same website will generate
-  different passwords as long as usernames differ.
-
-- usability:
- 
-  When possible, 1pass4all will auto-login after generating password
-  without popping up a confirmation form.
-
-  It seems that SuperGenPass doesn't work well on password-change page.
-  For example, it wrongly autofills all passwords in yahoo mail, and
-  cannot even work in gmail.
-
-- functionality:
-
-  To eliminate popup forms, 1pass4all provides a specialized password syntax
-  to utilize advanced features
-  (e.g. username auto-detection, password-length/hash-iteration/salt/base customization).
+The best part is that one compromised password will hardly impact other ones.
+Inspired by SuperGenPass, it offers some improvements. Please refer to the
+`this article`_ for more details.
 
 Installation
 ------------
 
 After ``make``, open the install.html under ``build`` directory, then 
-follow the instructions there. 
-Or, simple check the ``install`` part on `project page <http://hzheng.github.com/1pass4all/>`_.
-
-
-.. warning:: For security reason, please be advised to use a salt different
-             from the default one. 
-             You can modify the salt either by editing the Makefile or 
-             making change on installation page.
-             Also be sure all the bookmarklets installed on different browsers
-             or machines have the same salt, or they are **NOT** compatible.
+follow the instructions there. Or, simply check the
+`installation page <http://en.zhenghui.org/1pass4all/archive/install.html>`_.
  
 Usage
 -----
@@ -67,7 +34,7 @@ More generally, the password syntax is(bracketed terms are optional): ::
 
 where ``master_password``'s length is at least 6, 
 generated password's length ``pass_len`` is less than 100, 
-``hash_iteration`` indicates the hash iteration times,
+``hash_iteration`` indicates the hash iteration times(0-9999),
 ``salt`` is a `cryptographic salt <http://en.wikipedia.org/wiki/Salt_(cryptography)>`_,
 and ``options`` are extra options::
 
@@ -90,6 +57,8 @@ in one of the following cases:
  
 - A page does have password field, but fails to be detected for some reason.
 
+- Auto-login is disabled by customization.
+
 - Some unexpected error happened.
 
 Disclaimer 
@@ -98,7 +67,7 @@ Disclaimer
 This software is free to use at your own risk.
 It has been tested(but not fully) in latest browsers including 
 Firefox, Chrome, IE, Safari and Opera, and you're welcome to report any bug
-or suggestion to xyzdll [AT] gmail [DOT] com.
+or suggestion to xyzdll [AT] gmail [DOT] com, or leave your comment `here`_.
 
 
 Reference
@@ -111,3 +80,9 @@ Reference
 - `Wikipedia: HMAC <http://en.wikipedia.org/wiki/HMAC>`_
 
 - `Effective TLD <http://mxr.mozilla.org/mozilla/source/netwerk/dns/src/effective_tld_names.dat?raw=1>`_
+
+.. _`this article`:
+    http://en.zhenghui.org/2012/02/21/one-pass-for-all-intro/
+
+.. _`here`:
+    http://en.zhenghui.org/2012/02/21/one-pass-for-all-intro/#disqus_thread

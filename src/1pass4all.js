@@ -9,6 +9,7 @@ var onePassForAll = {
     /** Main function */
     main: function(settings) {
         extend(passCreator.settings, settings);
+        extend(this.settings, settings);
         try {
             var pwdValues = this._autofill();
         } catch (e) {
@@ -38,7 +39,7 @@ var onePassForAll = {
 
     _autofill: function() {
         var domain = getDomain();
-        this._autoSubmit = this.settings.autoSubmit;
+        this._autoSubmit = this.settings.autoSubmit === "true";
         if (!domain) {
             if (location.href.indexOf("file://") === 0) {
                 domain = "file"; // local
@@ -252,7 +253,7 @@ var onePassForAll = {
     },
 
     settings: {
-        autoSubmit: true,
+        autoSubmit: "true", // string(NOT boolean), may be modified by Makefile
         // styles
         fldSucceedStyle: {background: "#33FF66"},
         fldFailStyle: {background: "red"},
@@ -303,13 +304,13 @@ messages.add({
             onePassForAll.PASS_SYNTAX + "\n\n" +
             "where master_password's length is at least 6,\n" +
             "the generated password's length pass_len is a positive integer less than 100,\n" +
-            "hash_iteration is a positive integer,\n" +
+            "hash_iteration is an integer(0-9999),\n" +
             "options are other options(e.g. p: disable auto-submit)",
         zh: "密码格式错误。正确格式为（[]内为可选项）：\n" +
             onePassForAll.PASS_SYNTAX + "\n\n" +
             "其中主密码master_password长度不小于6位，\n" +
             "生成密码长度pass_len是一个小于100的正整数，\n" +
-            "hash迭代次数hash_iteration是一个正整数，\n" +
+            "hash迭代次数hash_iteration是一个整数（0-9999），\n" +
             "options是其他选项（p表示禁止自动提交）。"
     },
     error_detect_user_with_multipwd: {

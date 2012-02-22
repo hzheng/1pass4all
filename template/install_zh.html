@@ -2,53 +2,117 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <title>1pass4all安装</title>
+        <link href="install.css" rel="stylesheet" type="text/css">
     </head>
     <body>
         <h2>1pass4all ($VERSION版)</h2>
 
         <p>
-        <a href="http://hzheng.github.com/1pass4all">1pass4all</a>是
-        一个书签工具（bookmarklet），用于方便而安全地生成密码。
+            <a href="http://hzheng.github.com/1pass4all">1pass4all</a>是
+            一个书签工具（bookmarklet），用于方便而安全地生成密码。
+            更详细的说明可参见
+            <a href="http://en.zhenghui.org/2012/02/21/one-pass-for-all-intro/">此文</a>。
         </p>
-        <h3>安装指南：</h3>
+
+        <h3>定制：</h3>
         <p>
-            在Firefox、Chrome、Safari和Opera浏览器上，只需将链接
-            <a id="bookmarklet1" href='javascript: 
+            为了更安全起见，在安装之前您最好定制一下（尤其是
+            <a href="http://en.wikipedia.org/wiki/Salt_(cryptography)">密码盐</a>）。
+        </p>
+
+        <div>
+            <label>密码长度：</label>
+            <input type="hidden" id="passLenHidden" value="$PASS_LEN"/>
+            <select id="passLen"></select>
+            （越长越安全）<br/>
+ 
+            <label>密码字符集：</label>
+            <input type="hidden" id="passBaseHidden" value="$PASS_BASE"/>
+            <select id="passBase">
+                <option value="94">
+                    所有可打印字符
+                </option>
+                <option value="64">
+                    字母、数字以及+和/
+                </option>
+                <option value="62">
+                    字母和数字
+                </option>
+                <option value="10">
+                    只含数字
+                </option>
+            </select>
+            （字符范围越广越安全）<br/>
+            <label>迭代次数：</label>
+            <input id="iteration" maxlength="4" value="$ITERATION"/>
+            （范围0-9999，次数越多越安全，但生成速度越慢）<br/>
+            <label>密码盐（salt）：</label>
+            <input id="salt" size="64" value="$SALT"/>
+            （强烈建议<a href="javascript:newSalt()">换盐</a>）
+            <br/>
+            <label>自动登陆：</label>
+            <input type="hidden" id="autoSubmitHidden" value="$AUTO_SUBMIT"/>
+            <input type="checkbox" id="autoSubmit"/>
+            （在登陆页面填完主密码后点击标签工具将自动提交）
+            <br/>
+            <label>&nbsp;</label>
+            <button onclick="customize('定制完成', '正在定制…')">定制</button>
+            <span id="msg"></span>
+        </div>
+
+        <h3>安装：</h3>
+        <div>
+            <div class="version">
+                <a id="bookmarklet_ie" href='javascript:_1pass4all_settings={salt:"$SALT",iteration:"$ITERATION",passLen:"$PASS_LEN",passBase:"$PASS_BASE",autoSubmit:"$AUTO_SUBMIT"};s=document.createElement("script");s.type="text/javascript";s.src="$SCRIPT_URL";document.body.appendChild(s);void(0);'>IE版</a>
+                <span>（用于IE浏览器）</span><br/>
+                <div class="description">
+                    将以上链接用鼠标拖至收藏栏，或用右键加到收藏栏。
+                </div>
+            </div>
+            <div class="version">
+                <a id="bookmarklet" href='javascript: 
                 $SCRIPT
-            '>1pass4all</a>直接拖至书签栏即可，或用鼠标右键加到书签中。
-        </p>
+                '>非IE版</a>
+                <span>（用于非IE浏览器，如Firefox、Chrome、Safari、Opera）</span><br/>
 
-        <p>
-            但在IE浏览器中，则<strong>必须</strong>将链接
-            <a id="bookmarklet2" href='javascript:_1pass4all_settings={salt:"$SALT"};s=document.createElement("script");s.type="text/javascript";s.src="$SCRIPT_URL";document.body.appendChild(s);void(0);'>1pass4all</a>加入收藏栏（favorites bar）。
-        </p>
- 
-        <p>
-            如果您由于某种原因无法或不愿安装此工具（如在手机上或在他人的电脑上），
-            不妨试试<a href="mobile.html">移动版</a>。
-        </p>
- 
-        <p>
-            高级用户可从GitHub上检出该项目
-            （<code>git clone git://github.com/hzheng/1pass4all</code>），
-            然后阅读README。
-        </p>
+                <div class="description">
+                    将以上链接用鼠标拖至书签栏，或用右键加到书签栏。
+                </div>
+            </div>
+            <div class="version">
+                <a href="mobile.html">移动版</a>
+                <span>（用于手机、他人电脑或非信任网站上）</span><br/>
 
-        <h3>注：</h3>
-        <p>
-            为了更安全，在安装前最好修改一下
-            <a href="http://en.wikipedia.org/wiki/Salt_(cryptography)">salt（盐）</a>
-            （若您已在Makefile中修改过并正是用make生成的该页面，则可忽略此注）。<br/>
-            请注意在不同的浏览器或机器上的盐必须相同，否则将互不兼容。
-        </p>
-        <p>
-            旧salt：<br/>
-            <input size="64" readonly="true" value='$SALT'/><br/>
-            新salt（任意随机字符串，但引号'或"会被忽略）：<br/>
-            <input id="salt" size="64" value=''/>
-            <a href="javascript:createSalt()">自动生成</a><br/>
-            <button onclick="changeSalt()">换salt</button>
-        </p>
+                <div class="description">
+                    将以上链接保存为书签或本地的HTML文件。
+                </div>
+            </div>
+            <div class="version">
+                <a href="https://github.com/hzheng/1pass4all">自制版</a>
+                <span>（供高级用户使用）</span><br/>
+
+                <div class="description">
+                    高级用户可通过以上链接在GitHub上检出该项目，然后阅读README文件。
+                </div>
+            </div>
+        </div>
+
+        <div class="note">
+            <em>注：</em>
+            <p>
+                点击<span class="button">定制</span>按钮将更新IE版和非IE版的书签工具。
+                自制版可通过编辑Makefile中的相应变量来定制。
+                至于移动版，如果不想每次在新页面都调整各项参数，您需要从Makefile
+                中生成移动版的页面，或者手工编辑移动版的HTML文件。
+            </p>
+            <strong>警告：</strong>
+            <p>
+                您必须保证安装在不同浏览器或电脑上的书签工具（或移动版的书签）
+                均采用相同参数（包括密码长度、密码字符集、迭代次数和密码盐）。
+                否则，它们将<span style="font-weight:bold">互不兼容</span>。
+            </p>
+        </div>
+        
         <script src="install.js" type="text/javascript"></script>
     </body>
 </html>

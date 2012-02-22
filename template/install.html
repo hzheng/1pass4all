@@ -2,57 +2,126 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
         <title>1pass4all's installation</title>
+        <link href="install.css" rel="stylesheet" type="text/css">
     </head>
     <body>
         <h2>1pass4all (version $VERSION)</h2>
 
         <p>
             <a href="http://hzheng.github.com/1pass4all">1pass4all</a> is 
-            a bookmarklet to create passwords easily and securely.
+            a bookmarklet to create passwords easily and securely. For more
+            details, please read its introduction
+            <a href="http://en.zhenghui.org/2012/02/21/one-pass-for-all-intro/">here</a>.
         </p>
-        <h3>Installation instructions:</h3>
+
+        <h3>Customization:</h3>
         <p>
-            For browsers like Firefox, Chrome, Safari and Opera, we recommend you 
-            drag the link <a id="bookmarklet1" href='javascript: 
+            Before installation, you probably need customize bookmarklets
+            for better security(esp.
+            <a href="http://en.wikipedia.org/wiki/Salt_(cryptography)">cryptographic salt</a>).
+        </p>
+
+        <div>
+            <label>Password length:</label>
+            <input type="hidden" id="passLenHidden" value="$PASS_LEN"/>
+            <select id="passLen"></select>
+            (longer password means higher security)<br/>
+ 
+            <label>Password charset:</label>
+            <input type="hidden" id="passBaseHidden" value="$PASS_BASE"/>
+            <select id="passBase">
+                <option value="94">
+                    printable characters
+                </option>
+                <option value="64">
+                    letters, digits, + and /
+                </option>
+                <option value="62">
+                    letters and digits
+                </option>
+                <option value="10">
+                    digits only
+                </option>
+            </select>
+            (larger character set means higher security)<br/>
+            <label>Iteration:</label>
+            <input id="iteration" maxlength="4" value="$ITERATION"/>
+            (range: 0-9999, more iterations means higher security and lower speed)<br/>
+            <label>Salt:</label>
+            <input id="salt" size="64" value="$SALT"/>
+            (<a href="javascript:newSalt()">change salt</a> is STRONGLY recommended)
+            <br/>
+            <label>Auto-login:</label>
+            <input type="hidden" id="autoSubmitHidden" value="$AUTO_SUBMIT"/>
+            <input type="checkbox" id="autoSubmit"/>
+            (auto-submit in login page after a master password being filled out)
+            <br/>
+            <label>&nbsp;</label>
+            <button onclick="customize('customization done', 'customizing...')">customize</button>
+            <span id="msg"></span>
+        </div>
+
+        <h3>Installation:</h3>
+        <div>
+            <div class="version">
+                <a id="bookmarklet_ie" href='javascript:_1pass4all_settings={salt:"$SALT",iteration:"$ITERATION",passLen:"$PASS_LEN",passBase:"$PASS_BASE",autoSubmit:"$AUTO_SUBMIT"};s=document.createElement("script");s.type="text/javascript";s.src="$SCRIPT_URL";document.body.appendChild(s);void(0);'>IE version</a>
+                <span>(for Internet Explorer)</span><br/>
+                <div class="description">
+                    Drag the above hyperlink to the favorites bar or
+                    right click it to add to favorites bar.
+                </div>
+            </div>
+            <div class="version">
+                <a id="bookmarklet" href='javascript: 
                 $SCRIPT
-            '>1pass4all</a> to bookmarks bar, or right click it to add to your bookmarks.
-        </p>
+                '>Non-IE version</a>
+                <span>(for Firefox/Chrome/Safari/Opera)</span><br/>
 
-        <p>
-            For Internet Explorer, whose bookmarklet(or favelet) has size limit,
-            you MUST instead drag this link
-            <a id="bookmarklet2" href='javascript:_1pass4all_settings={salt:"$SALT"};s=document.createElement("script");s.type="text/javascript";s.src="$SCRIPT_URL";document.body.appendChild(s);void(0);'>1pass4all</a> to favorites bar.
-        </p>
- 
-        <p>
-            If you cannot or don't want to install bookmarklet for some reason
-            (e.g. on a mobile or on other's computer), please try the <a
-                href="mobile.html">mobile version</a>.
-        </p>
- 
-        <p>
-            An advanced user can check out the project on the master branch
-            (<code>git clone git://github.com/hzheng/1pass4all</code>),
-            then check the README file.
-        </p>
+                <div class="description">
+                    Drag the above hyperlink to the bookmarks toolbar or
+                    right click it to add to bookmarks.
+                </div>
+            </div>
+            <div class="version">
+                <a href="mobile.html">Mobile version</a>
+                <span>(on mobile/other's computer/untrusted website)</span><br/>
 
-        <h3>Note:</h3>
-        <p>
-            Before installation, you may change the 
-            <a href="http://en.wikipedia.org/wiki/Salt_(cryptography)">salt</a> for better security
-            (<em>ignore it if you have changed the salt in Makefile and
-                generated this page by make</em>).<br/>
-            You MUST make sure the bookmarklets installed on different browsers or machines have the same salt,
-            otherwise they are NOT compatible.
-        </p>
-        <p>
-            Old salt: <br/>
-            <input size="64" readonly="true" value='$SALT'/><br/>
-            New salt(any random characters except quotes):<br/>
-            <input id="salt" size="64" value=''/>
-            <a href="javascript:createSalt()">auto create</a><br/>
-            <button onclick="changeSalt()">change salt</button>
-        </p>
+                <div class="description">
+                    Save the above hyperlink as a bookmark or a local HTML file.
+                </div>
+            </div>
+            <div class="version">
+                <a href="https://github.com/hzheng/1pass4all">DIY version</a>
+                <span>(for advanced user)</span><br/>
+
+                <div class="description">
+                    Follow the above hyperlink to check out the project on
+                    GitHub and read the README file.
+                </div>
+            </div>
+        </div>
+ 
+        <div class="note">
+            <em>Note:</em>
+            <p>
+                Clicking on the <span class="button">customize</span> button 
+                will update bookmarklets of IE version and non-IE version.
+                DIY version can be customized by editing corresponding variables
+                in Makefile. As for mobile version, if you don't want to change
+                the parameters on every refresh page, you have to generate
+                mobile page from Makefile, or manually edit the mobile version's
+                HTML file.
+            </p>
+            <strong>Warning:</strong>
+            <p>
+                You MUST make sure the bookmarklets(or bookmarks in mobile
+                version) installed on different browsers or computers have
+                EXACTLY the same paramters, including password length,
+                password charset, iteration and salt, otherwise they will
+                NOT be compatible.
+            </p>
+        </div>
+
         <script src="install.js" type="text/javascript"></script>
     </body>
 </html>
