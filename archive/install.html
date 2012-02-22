@@ -5,7 +5,7 @@
         <link href="install.css" rel="stylesheet" type="text/css">
     </head>
     <body>
-        <h2>1pass4all (version 0.2.5)</h2>
+        <h2>1pass4all (version 0.2.5) <a href="install_zh.html">中文</a></h2>
 
         <p>
             <a href="http://hzheng.github.com/1pass4all">1pass4all</a> is 
@@ -111,7 +111,7 @@ b=this._getDocument(document),c=b.activeElement,d=b.forms||[],e=0;e<d.length;++e
 this._autoSubmit=!1;return}}for(var j,e=a.length-1;0<=e;--e)if(a[e]==c){j=c;break}j||(j=a[0]);a=j.value;if(!a||a.length<passCreator.MIN_MASTER_PASS_LEN)this.markField(j,!0),j.focus(),this.raiseError("SyntaxError","error_masterpass_too_short");this._pwdFld=j;j=1==this._countPwdFlds(this._form);this._autoSubmit&=j;return this.parsePwdValue(a,!0,j)},_countPwdFlds:function(a){if(!a)return 0;for(var a=a.elements,b=0,c=a.length-1;0<=c;--c){var d=a[c];"password"==d.type&&isVisible(d)&&++b}log("password field%27s count: "+
 b);return b},parsePwdValue:function(a,b,c){log("parsing "+a);(a=this.PASS_REGEX.exec(a))||this.raiseError("SyntaxError","error_pass_syntax");var d=a[1]?a[2]:null;""===d&&b&&(c?d=this._findUsername():this.raiseError("PasswordError","error_detect_user_with_multipwd"));for(var c=b=null,e=a[13]||"",f=0;f<e.length;++f)switch(e[f]){case "A":b=64;break;case "6":b=64;break;case "a":b=62;break;case "n":b=10;break;case "p":c=!1;break;default:this.raiseError("SyntaxError",messages.get("error_option")+e[f])}return{user:d,
 pass:a[3],passLen:a[5]||0,domain:a[7]||"",iteration:a[9]||0,salt:a[11]||"",passBase:b,autoSubmit:c}},_findUsername:function(){var a,b;if(this._form)for(var c=!1,d=this._form.elements.length-1;0<=d;--d){var e=this._form.elements[d];if(e==this._pwdFld)c=!0;else if(c){var f=isVisible(e);if("text"==e.type&&f){a=e;break}else("hidden"==e.type||!f)&&/(email|username|login)$/i.test(e.name)?b=e:log("skipped "+e)}}(a=a||b)||this.raiseError("PasswordError","error_detect_user");a.value||(this.markField(a,!0),
-a.focus(),this.raiseError("LoginError","error_empty_user"));log("user="+a.value);this.markField(a);return a.value},_showPasswordPanel:function(a){var b=document.getElementById(passCreator.PANEL_ID);b?b.style.display="block":passCreator.createPasswordPanel(null,this.settings,a)},settings:{autoSubmit:"true",fldSucceedStyle:{background:"#33FF66"},fldFailStyle:{background:"red"},panelCss:"position: fixed; top: 2px; right: 2px; width: 320px;z-index: 2147483647; background-color: #c9c9c9;margin: auto; padding: 6px 2px; border: 2px outset;-moz-border-radius: 10px; -webkit-border-radius: 10px;border-radius: 10px; -khtml-border-radius: 10px;",
+a.focus(),this.raiseError("LoginError","error_empty_user"));log("user="+a.value);this.markField(a);return a.value},_showPasswordPanel:function(a){var b=document.getElementById(passCreator.PANEL_ID);b?b.style.display="block":passCreator.createPasswordPanel(null,this.settings,a)},settings:{autoSubmit:"true",fldSucceedStyle:{background:"#33FF66"},fldFailStyle:{background:"red"},panelCss:"position: fixed; top: 2px; right: 2px; width: 320px;z-index: 2147483647; background-color: #DCDCDC;margin: auto; padding: 6px 2px; border: 2px outset;-moz-border-radius: 10px; -webkit-border-radius: 10px;border-radius: 10px; -khtml-border-radius: 10px;",
 labelCss:"float: left; width: 40%25; margin: 0 6px 0 0;padding: 2px 1px; text-align: right;font: normal 10pt arial,verdana,sans-serif",fldCss:"overflow: hidden; width: 55%25",inputCss:"width: 100%25; margin: 3px 2px; padding: 2px;border: none;background: #FFF;",selectCss:"width: 55%25; margin: 3px 2px; padding: 2px",buttonCss:"background: #7182A4; color: #FFFFFF;margin: 2px; border: 0px; padding: 2px 6px;font: normal 9pt arial;-moz-border-radius: 8px; -webkit-border-radius: 8px;border-radius: 8px; -khtml-border-radius: 8px",
 titleBarStyle:{width:"100%25",color:"#1E1F21","background-color":"transparent",borderBottom:"2px inset #CACED6",marginBottom:"6px",padding:"0"},titleStyle:{width:"70%25",padding:"1px 2px",margin:"1px",font:"bold 12pt serif"},topBtnStyle:{cssFloat:"right",cursor:"pointer",padding:"1px 6px",border:"none","text-decoration":"none",color:"#5B657A",font:"normal 14px tahoma,arial,sans-serif"},advancedDivStyle:{width:"100%25",display:"none"},cmdDivStyle:{width:"75%25",margin:"8px auto"},genBtnStyle:{cssFloat:"left"},
 clearBtnStyle:{cssFloat:"right"},msgDivStyle:{width:"100%25","text-align":"center",font:"normal 10pt arial",display:"none"},msgFldStyle:{color:"red",background:"transparent",border:"none","text-align":"center"},resultDivStyle:{width:"100%25","text-align":"center",font:"normal 10pt arial",display:"none"},resultFldStyle:{color:"green",background:"transparent",border:"none","text-align":"center"}}};
@@ -146,7 +146,35 @@ zh:"\u62b1\u6b49\u65e0\u6cd5\u81ea\u52a8\u68c0\u67e5\u5230\u7528\u6237\u540d\uff
                 </div>
             </div>
         </div>
+
+        <h3>Usage:</h3>
+        <p>
+            Basic usage of 1pass4all can be described by the following
+            two simple scenarios. For more advanced usage, please refer to
+            the usage section of
+            <a href="https://github.com/hzheng/1pass4all/blob/master/README.rst">
+            README file</a>.
+        </p>
+        <li>change password with 1pass4all</li>
+        <p>
+            Have a strong and secret password in mind(called "master password"
+            hereafter), log in some web account and go to password-change page.
+            Fill the new-password field with the master password and then click
+            1pass4all bookmarklet. A new password will be generated and
+            substitute the master password in-place.
+            If applicable, repeat the action in a confirmed-password field.
+            Save the change and log out.
+        </p>
+        <li>log in with 1pass4all</li>
+        <p>
+            Back to login page, type a username in the login field and a master
+            password into the password field, then click the 1pass4all
+            bookmarklet. Just as the previous step, the actual password is
+            populated. The only difference is 1pass4all will auto-submit
+            login form this time(provided that auto-login is enabled).
+        </p>
  
+        <hr/>
         <div class="note">
             <em>Note:</em>
             <p>
