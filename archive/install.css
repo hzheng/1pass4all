@@ -1,0 +1,85 @@
+body {
+    font-family: arial, sans-serif;
+}
+
+.version {
+    width: 70%;
+    background: #C3CFDB;
+    margin: 6px 2px 8px 4px;
+    border-radius: 8px;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    padding: 4px 2px 4px 8px;
+}
+.version a {
+    font-weight: 600;
+    font-size: 110%;
+    padding: 4px 2px 4px 8px;
+}
+
+.version a:link, .version a:visited {
+    color: #324184;
+}
+
+.version span {
+    margin: 0px 5px;
+    font-size: 80%;
+    font-family: helvetica, sans-serif;
+    color: #AF60B2;
+}
+
+.description {
+    padding: 6px 2px 4px 12px;
+
+}
+label {
+    width: 10em;
+    float: left;
+    font-weight: 600;
+}
+
+input, select {
+    width: 25em;
+    margin: 5px 2px;
+}
+
+button, .button {
+    color: #FFF;
+    background-color: #79A4D0;
+}
+
+button {
+    padding: 6px 10px;
+    text-align: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.button {
+    padding: 2px;
+    border: 1px outset silver;
+}
+
+.note {
+    margin: 8px 2px;
+    padding: 4px 2px;
+    width: 70%;
+}
+
+.note em {
+    color: green;
+    display: block;
+    padding-top: 6px;
+}
+
+.note strong {
+    color: red;
+    display: block;
+    padding-top: 4px;
+}
+
+#msg {
+    color: green;
+    margin-left: 8px;
+    font-size: 90%;
+}
