@@ -258,7 +258,7 @@ var onePassForAll = {
         fldSucceedStyle: {background: "#33FF66"},
         fldFailStyle: {background: "red"},
         panelCss: "position: fixed; top: 2px; right: 2px; width: 320px;" +
-            "z-index: 2147483647; background-color: #c9c9c9;" +
+            "z-index: 2147483647; background-color: #DCDCDC;" +
             "margin: auto; padding: 6px 2px; border: 2px outset;" +
             "-moz-border-radius: 10px; -webkit-border-radius: 10px;" +
             "border-radius: 10px; -khtml-border-radius: 10px;",

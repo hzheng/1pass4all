@@ -2,6 +2,12 @@ body {
     font-family: arial, sans-serif;
 }
 
+h2 a {
+    font-size: 70%;
+    text-decoration: none;
+    padding-left: 1em;
+}
+
 .version {
     width: 70%;
     background: #C3CFDB;
