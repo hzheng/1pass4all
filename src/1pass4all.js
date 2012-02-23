@@ -10,14 +10,16 @@ var onePassForAll = {
     main: function(settings) {
         extend(passCreator.settings, settings);
         extend(this.settings, settings);
+        var hasError;
         try {
             var pwdValues = this._autofill();
         } catch (e) {
+            hasError = true;
             handleError(e, "autofill");
             if (e.retry) {return;}
         }
         try {
-            if (!this._autoSubmit) {
+            if (hasError || !this._autoSubmit) {
                 this._showPasswordPanel(pwdValues);
             }
         } catch (e2) {
@@ -257,37 +259,40 @@ var onePassForAll = {
         // styles
         fldSucceedStyle: {background: "#33FF66"},
         fldFailStyle: {background: "red"},
-        panelCss: "position: fixed; top: 2px; right: 2px; width: 320px;" +
-            "z-index: 2147483647; background-color: #DCDCDC;" +
+        outerCss: "",
+        panelCss: "position: absolute; top: 2px; right: 2px; width: 320px;" +
+            "text-align: center; vertical-align: bottom;" +
+            "z-index: 2147483647; background-color: #D0D0D0;" +
             "margin: auto; padding: 6px 2px; border: 2px outset;" +
             "-moz-border-radius: 10px; -webkit-border-radius: 10px;" +
             "border-radius: 10px; -khtml-border-radius: 10px;",
-        labelCss: "float: left; width: 40%; margin: 0 6px 0 0;" +
-            "padding: 2px 1px; text-align: right;" +
+        labelCss: "float: left; width: 40%; margin: 3px 6px 0 0;" +
+            "padding: 2px 1px 0px 1px; text-align: right; vertical-align: bottom;" +
             "font: normal 10pt arial,verdana,sans-serif",
-        fldCss: "overflow: hidden; width: 55%",
-        inputCss: "width: 100%; margin: 3px 2px; padding: 2px;" +
+        fldCss: "float: right; width: 55%; margin: 3px 4px; padding: 0px; overflow: hidden; width: 55%",
+        inputCss: "width: 100%; margin: 0px; padding: 2px;" +
             "border: none;" +
             "background: #FFF;",
-        selectCss: "width: 55%; margin: 3px 2px; padding: 2px",
+        selectCss: "float: right; width: 55%; margin: 3px 2px; padding: 0px",
         buttonCss: "background: #7182A4; color: #FFFFFF;" +
             "margin: 2px; border: 0px; padding: 2px 6px;" +
             "font: normal 9pt arial;" +
             "-moz-border-radius: 8px; -webkit-border-radius: 8px;" +
             "border-radius: 8px; -khtml-border-radius: 8px",
+        inputRegionStyle: {margin: "0px", padding: "0px"},
         titleBarStyle: {width: "100%", 
             color: "#1E1F21", 'background-color': "transparent",
-            borderBottom: "2px inset #CACED6",
+            borderBottom: "1px solid #BEC6D7",
             marginBottom: "6px", padding: "0"},
-        titleStyle: {width: "70%", padding: "1px 2px", margin: "1px",
-            font: "bold 12pt serif"},
+        titleStyle: {width: "70%", padding: "1px 4px", margin: "1px",
+            cssFloat: "left", font: "bold 12pt serif", "text-align": "left"},
         topBtnStyle: {cssFloat: "right", cursor: "pointer",
             padding: "1px 6px", border: "none", "text-decoration": "none",
             color: "#5B657A", font: "normal 14px tahoma,arial,sans-serif"},
         advancedDivStyle: {width: "100%", display: "none"},
-        cmdDivStyle: {width: "75%", margin: "8px auto"},
-        genBtnStyle: {cssFloat: "left"},
-        clearBtnStyle: {cssFloat: "right"},
+        cmdDivStyle: {width: "80%", margin: "4px auto 0px auto", padding: "0px"},
+        genBtnStyle: {width: "48%", cssFloat: "left"},
+        clearBtnStyle: {width: "48%", cssFloat: "right"},
         msgDivStyle: {width: "100%", 'text-align': "center", 
             font: "normal 10pt arial", display: "none"},
         msgFldStyle: {color: "red", background: "transparent", border: "none", 'text-align': "center"},

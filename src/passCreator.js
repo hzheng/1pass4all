@@ -369,7 +369,8 @@ var passCreator = {
     },
 
     createPasswordPanel: function(container, settings, pwdValues) {
-        var cssText = this.contextCss("", settings.panelCss);
+        var cssText = settings.outerCss || "";
+        cssText += this.contextCss("", settings.panelCss);
         cssText += this.contextCss("label", settings.labelCss);
         cssText += this.contextCss("." + this.FLD_CLASS, settings.fldCss);
         cssText += this.contextCss("input", settings.inputCss);
