@@ -9,9 +9,9 @@
 
         <p>
             <a href="http://hzheng.github.com/1pass4all">1pass4all</a>是
-            一个书签工具（bookmarklet），用于方便而安全地生成密码。
+            一个小书签（bookmarklet，或译为书签工具），用于方便而安全地生成密码。
             更详细的介绍可参见
-            <a href="http://en.zhenghui.org/2012/02/21/one-pass-for-all-intro/">此文</a>。
+            <a href="http://en.zhenghui.org/2012/02/26/one-pass-for-all-intro_CN/">此文</a>。
         </p>
 
         <h3>定制：</h3>
@@ -106,12 +106,12 @@
         <li>用1pass4all更换密码</li>
         <p>
             想好一个秘密的强密码（以下称“主密码”），登陆到某个网站后，转到更换密码页面。
-            在“新密码”栏中填入主密码，然后点击1pass4all书签工具。一个新密码将产生并
+            在“新密码”栏中填入主密码，然后点击1pass4all小书签。一个新密码将产生并
             在原地替换主密码。若有“确认新密码”栏，则重复上述步骤。保存变化并登出帐户。
         </p>
         <li>用1pass4all登陆</li>
         <p>
-            回到登陆页面，输入用户名后在密码栏输入主密码，点击1pass4all书签工具。
+            回到登陆页面，输入用户名后在密码栏输入主密码，点击1pass4all小书签。
             与前面一样，实际密码将替换主密码，唯一不同的是，1pass4all这次会
             自动提交登陆表单（前提是已启用“自动登陆”选项）。
         </p>
@@ -120,14 +120,14 @@
         <div class="note">
             <em>注：</em>
             <p>
-                点击<span class="button">定制</span>按钮将更新IE版和非IE版的书签工具。
+                点击<span class="button">定制</span>按钮将更新IE版和非IE版的小书签。
                 自制版可通过编辑Makefile中的相应变量来定制。
                 至于移动版，如果不想每次在新页面都调整各项参数，您需要从Makefile
                 中生成移动版的页面，或者手工编辑移动版的HTML文件。
             </p>
             <strong>警告：</strong>
             <p>
-                您必须保证安装在不同浏览器或电脑上的书签工具（或移动版的书签）
+                您必须保证安装在不同浏览器或电脑上的小书签（或移动版的书签）
                 均采用相同参数（包括密码长度、密码字符集、迭代次数和密码盐）。
                 否则，它们将<span style="font-weight:bold">互不兼容</span>。
             </p>
