@@ -262,7 +262,7 @@ var onePassForAll = {
         outerCss: "",
         panelCss: "position: absolute; top: 2px; right: 2px; width: 320px;" +
             "text-align: center; vertical-align: bottom;" +
-            "z-index: 2147483647; background-color: #D0D0D0;" +
+            "z-index: 2147483647; color: #000; background-color: #D0D0D0;" +
             "margin: auto; padding: 6px 2px; border: 2px outset;" +
             "-moz-border-radius: 10px; -webkit-border-radius: 10px;" +
             "border-radius: 10px; -khtml-border-radius: 10px;",

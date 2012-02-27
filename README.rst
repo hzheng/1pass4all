@@ -14,7 +14,7 @@ Inspired by SuperGenPass, it offers some improvements. Please refer to the
 Installation
 ------------
 
-After ``make``, open the install.html under ``build`` directory, then 
+After ``make``, open the install.html under ``build/dist`` directory, then 
 follow the instructions there. Or, simply check the
 `installation page <http://en.zhenghui.org/1pass4all/archive/install.html>`_.
  
