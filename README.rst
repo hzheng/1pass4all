@@ -61,10 +61,42 @@ in one of the following cases:
 
 - Some unexpected error happened.
 
+*NOTE:*
+
+User name and domain are all case-insensitive. Internally, TLD will be stripped
+of domains, such that user can share password between yahoo.com and yahoo.com.cn,
+google.com and google.cn, box.com and box.net, etc.
+
+Troubleshooting 
+---------------
+
+- 1pass4all cannot auto-login
+  
+  If that is the case, please append the master password with " -p"
+  (i.e. space, dash and letter ``p``) to disable auto-login and pop up
+  a form.
+
+- 1pass4all cannot transform master password in-place
+
+  If 1pass4all fails to find the right place of password fields, you have to
+  type a master password in a pop-up form and manually copy or type the generated
+  password into password fields.
+
+- website complains that the generated password has illegal characters
+
+  Some websites disallow special characters in password. If that is the case,
+  please append the master password with " -a"(i.e. space, dash and letter ``a``)
+  to exclude special characters.
+
+- website complains that the generated password is too long
+
+  Please append the master password with space and a number which specifies
+  the length of generated password(DON'T manually truncate the result password).
+
 Disclaimer 
 ----------
 
-This software is free to use at your own risk.
+This software is free to use **at your own risk**.
 It has been tested(but not fully) in latest browsers including 
 Firefox, Chrome, IE, Safari and Opera, and you're welcome to report any bug
 or suggestion to xyzdll [AT] gmail [DOT] com, or leave your comment `here`_.
