@@ -111,7 +111,7 @@ _checkPasswordFields:function(){this._form=null;for(var a=[],b=this._getDocument
 a.push(i));if(0===a.length){log("password field not found");this._autoSubmit=!1;return}}for(var j,e=a.length-1;0<=e;--e)if(a[e]==c){j=c;break}j||(j=a[0]);a=j.value;if(!a||a.length<passCreator.MIN_MASTER_PASS_LEN)this.markField(j,!0),j.focus(),this.raiseError("SyntaxError","error_masterpass_too_short");this._pwdFld=j;j=1==this._countPwdFlds(this._form);this._autoSubmit&=j;return this.parsePwdValue(a,!0,j)},_countPwdFlds:function(a){if(!a)return 0;for(var a=a.elements,b=0,c=a.length-1;0<=c;--c){var d=
 a[c];"password"==d.type&&isVisible(d)&&++b}log("password field%27s count: "+b);return b},parsePwdValue:function(a,b,c){log("parsing "+a);(a=this.PASS_REGEX.exec(a))||this.raiseError("SyntaxError","error_pass_syntax");var d=a[1]?a[2]:null;""===d&&b&&(c?d=this._findUsername():this.raiseError("PasswordError","error_detect_user_with_multipwd"));for(var c=b=null,e=a[13]||"",f=0;f<e.length;++f)switch(e[f]){case "A":b=64;break;case "6":b=64;break;case "a":b=62;break;case "n":b=10;break;case "p":c=!1;break;
 default:this.raiseError("SyntaxError",messages.get("error_option")+e[f])}return{user:d,pass:a[3],passLen:a[5]||0,domain:a[7]||"",iteration:a[9]||0,salt:a[11]||"",passBase:b,autoSubmit:c}},_findUsername:function(){var a,b;if(this._form)for(var c=!1,d=this._form.elements.length-1;0<=d;--d){var e=this._form.elements[d];if(e==this._pwdFld)c=!0;else if(c){var f=isVisible(e);if("text"==e.type&&f){a=e;break}else("hidden"==e.type||!f)&&/(email|username|login)$/i.test(e.name)?b=e:log("skipped "+e)}}(a=a||
-b)||this.raiseError("PasswordError","error_detect_user");a.value||(this.markField(a,!0),a.focus(),this.raiseError("LoginError","error_empty_user"));log("user="+a.value);this.markField(a);return a.value},_showPasswordPanel:function(a){var b=document.getElementById(passCreator.PANEL_ID);b?b.style.display="block":passCreator.createPasswordPanel(null,this.settings,a)},settings:{autoSubmit:"true",fldSucceedStyle:{background:"#33FF66"},fldFailStyle:{background:"red"},outerCss:"",panelCss:"position: absolute; top: 2px; right: 2px; width: 320px;text-align: center; vertical-align: bottom;z-index: 2147483647; background-color: #D0D0D0;margin: auto; padding: 6px 2px; border: 2px outset;-moz-border-radius: 10px; -webkit-border-radius: 10px;border-radius: 10px; -khtml-border-radius: 10px;",
+b)||this.raiseError("PasswordError","error_detect_user");a.value||(this.markField(a,!0),a.focus(),this.raiseError("LoginError","error_empty_user"));log("user="+a.value);this.markField(a);return a.value},_showPasswordPanel:function(a){var b=document.getElementById(passCreator.PANEL_ID);b?b.style.display="block":passCreator.createPasswordPanel(null,this.settings,a)},settings:{autoSubmit:"true",fldSucceedStyle:{background:"#33FF66"},fldFailStyle:{background:"red"},outerCss:"",panelCss:"position: absolute; top: 2px; right: 2px; width: 320px;text-align: center; vertical-align: bottom;z-index: 2147483647; color: #000; background-color: #D0D0D0;margin: auto; padding: 6px 2px; border: 2px outset;-moz-border-radius: 10px; -webkit-border-radius: 10px;border-radius: 10px; -khtml-border-radius: 10px;",
 labelCss:"float: left; width: 40%25; margin: 3px 6px 0 0;padding: 2px 1px 0px 1px; text-align: right; vertical-align: bottom;font: normal 10pt arial,verdana,sans-serif",fldCss:"float: right; width: 55%25; margin: 3px 4px; padding: 0px; overflow: hidden; width: 55%25",inputCss:"width: 100%25; margin: 0px; padding: 2px;border: none;background: #FFF;",selectCss:"float: right; width: 55%25; margin: 3px 2px; padding: 0px",buttonCss:"background: #7182A4; color: #FFFFFF;margin: 2px; border: 0px; padding: 2px 6px;font: normal 9pt arial;-moz-border-radius: 8px; -webkit-border-radius: 8px;border-radius: 8px; -khtml-border-radius: 8px",
 inputRegionStyle:{margin:"0px",padding:"0px"},titleBarStyle:{width:"100%25",color:"#1E1F21","background-color":"transparent",borderBottom:"1px solid #BEC6D7",marginBottom:"6px",padding:"0"},titleStyle:{width:"70%25",padding:"1px 4px",margin:"1px",cssFloat:"left",font:"bold 12pt serif","text-align":"left"},topBtnStyle:{cssFloat:"right",cursor:"pointer",padding:"1px 6px",border:"none","text-decoration":"none",color:"#5B657A",font:"normal 14px tahoma,arial,sans-serif"},advancedDivStyle:{width:"100%25",display:"none"},
 cmdDivStyle:{width:"80%25",margin:"4px auto 0px auto",padding:"0px"},genBtnStyle:{width:"48%25",cssFloat:"left"},clearBtnStyle:{width:"48%25",cssFloat:"right"},msgDivStyle:{width:"100%25","text-align":"center",font:"normal 10pt arial",display:"none"},msgFldStyle:{color:"red",background:"transparent",border:"none","text-align":"center"},resultDivStyle:{width:"100%25","text-align":"center",font:"normal 10pt arial",display:"none"},resultFldStyle:{color:"green",background:"transparent",border:"none","text-align":"center"}}};
@@ -190,9 +190,20 @@ zh:"\u62b1\u6b49\u65e0\u6cd5\u81ea\u52a8\u68c0\u67e5\u5230\u7528\u6237\u540d\uff
             <p>
                 You MUST make sure the bookmarklets(or bookmarks in mobile
                 version) installed on different browsers or computers have
-                EXACTLY the same paramters, including password length,
+                EXACTLY the same parameters, including password length,
                 password charset, iteration and salt, otherwise they will
                 NOT be compatible.
+                Please keep the master password in mind and the related parameters 
+                in a safe place, losing any of them will lock you out of your
+                accounts.
+            <p>
+            </p>
+                If you don't really trust a website, please stop using bookmarklet
+                there, instead, use mobile version to generate passwords.
+            </p>
+            <strong>Disclaimer:</strong>
+            <p>
+                This software is free to use, but AT YOUR OWN RISK.
             </p>
         </div>
 
