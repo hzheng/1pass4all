@@ -3,7 +3,7 @@
  */
 
 var onePassForAll_mobile = {
-    WRAPPER_ID: "onePassForAll_wrapper",
+    WRAPPER_ID: "onePassForAllWrapper",
 
     /** Main function */
     main: function() {
@@ -14,7 +14,7 @@ var onePassForAll_mobile = {
 
     settings: {
         panelCss: "margin: 0px auto; width: 100%;" +
-            "padding: 2px 0px; background-color: #FFF;",
+            "padding: 2px 0px; background-color: transparent;",
         labelCss: "float: left; text-align: left; margin-left: 6px;" +
             "padding: 2px 8px;" +
             "font: bold 1em arial,verdana,sans-serif",
@@ -22,8 +22,8 @@ var onePassForAll_mobile = {
         inputCss: "width: 100%; border: none;" +
             "margin: 3px 2px; padding: 2px",
         selectCss: "margin: 3px 2px; padding: 2px",
-        buttonCss: "background: #79A4D0; color: #FFFFFF; font-size: 1.2em;" +
-            "margin-top: 8px; padding: 2px 0; border: 1px solid silver;" +
+        buttonCss: "background: #FFF; color: #000; font-weight: bold;font-size: 1.1em;" +
+            "margin-top: 4px; padding: 3px 0; border: 1px solid silver;" +
             "-moz-border-radius: 5px; -webkit-border-radius: 5px;" +
             "border-radius: 5px; -khtml-border-radius: 5px",
         inputRegionStyle: {border: "1px solid silver",

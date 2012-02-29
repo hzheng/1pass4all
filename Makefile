@@ -1,6 +1,6 @@
 ### APP VARIABLES
 APP = 1pass4all
-VERSION = 0.2.5b
+VERSION = 0.2.6
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
 BOOKMARKLET_NAME = $(APP).js
@@ -40,15 +40,16 @@ MOBILE_TPL = $(TPL_DIR)/mobile.html
 COMPILED_BOOKMARKLET_JS = $(BUILD_DIR)/compiled_bookmarklet.js
 COMPILED_MOBILE_JS = $(BUILD_DIR)/compiled_mobile.js
 ENCODED_JS = $(BUILD_DIR)/encoded.js
-BOOKMARK_URL = $(BUILD_DIR)/bookmark.url
+BOOKMARKLET_URL = $(BUILD_DIR)/bookmark.url
 INSTALL_HTM = $(BUILD_DIR)/install.html
 INSTALL_ZH_HTM = $(BUILD_DIR)/install_zh.html
 MOBILE_HTM = $(BUILD_DIR)/mobile.html
-DIST_BOOKMARKLET_JS = $(BUILD_DIR)/$(APP_TITLE).js
-DIST_MOBILE_JS = $(BUILD_DIR)/$(APP_TITLE)_mobile.js
+BUILT_BOOKMARKLET_JS = $(BUILD_DIR)/$(APP_TITLE).js
+BUILT_MOBILE_JS = $(BUILD_DIR)/$(APP_TITLE)_mobile.js
+MOBILE_URL = $(BUILD_DIR)/mobile.url
 
 ### TARGETS
-all: init $(INSTALL_HTM) $(INSTALL_ZH_HTM) $(MOBILE_HTM) $(BOOKMARK_URL)
+all: init $(INSTALL_HTM) $(INSTALL_ZH_HTM) $(BOOKMARKLET_URL)
 
 init:
 	@mkdir -p $(DIST_DIR)
@@ -73,40 +74,41 @@ $(COMPILED_MOBILE_JS): $(MOBILE_SRC)
 		 -e 's/\(salt: "\).*"/\1$(SALT)"/' $^ \
 	 | java -jar $(LIB_DIR)/compiler.jar --js_output_file $@
 
-$(DIST_BOOKMARKLET_JS): $(COMPILED_BOOKMARKLET_JS)
+$(BUILT_BOOKMARKLET_JS): $(COMPILED_BOOKMARKLET_JS)
 	@echo "generating wrapped script(bookmarklet):" $@
 	@(echo "(function(){" | cat - $<; echo "})();") > $@
 	@cp $@ $(DIST_DIR)/$(BOOKMARKLET_NAME)
 
-$(DIST_MOBILE_JS): $(COMPILED_MOBILE_JS)
+$(BUILT_MOBILE_JS): $(COMPILED_MOBILE_JS)
 	@echo "generating wrapped script(mobile):" $@
 	@(echo "(function(){" | cat - $<; echo "})();") > $@
 
 # Chrome and Safari 5 won't work for single percentage signs
 # Single quotes must be escaped
-$(ENCODED_JS): $(DIST_BOOKMARKLET_JS)
+$(ENCODED_JS): $(BUILT_BOOKMARKLET_JS)
 	@echo "generating encoded script:" $@
 	@sed -e 's/%/%25/g' -e "s/'/%27/g" $< > $@
 
-$(INSTALL_HTM): $(ENCODED_JS) $(INSTALL_TPL) $(INSTALL_RES)
+$(INSTALL_HTM): $(ENCODED_JS) $(INSTALL_TPL) $(INSTALL_RES) $(MOBILE_URL)
 	@echo "generating installation page: " $@
 	@sed -e 's/$$VERSION/$(VERSION)/' -e 's/$$SCRIPT_URL/$(SCRIPT_URL)/' \
 		 -e 's/$$SALT/$(SALT)/' -e 's/$$ITERATION/$(ITERATION)/' \
 		 -e 's/$$PASS_LEN/$(PASS_LEN)/' -e 's/$$PASS_BASE/$(PASS_BASE)/' \
          -e 's/$$AUTO_SUBMIT/$(AUTO_SUBMIT)/' $(INSTALL_TPL) \
-		| awk '{if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
+		| awk '{if ($$0 ~ /\$$MOBILE_URL/) {while (getline < "$(MOBILE_URL)") print} else if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
 	@cp $@ $(INSTALL_RES) $(RES_DIR)/* $(DIST_DIR)/
 
-$(INSTALL_ZH_HTM): $(ENCODED_JS) $(INSTALL_ZH_TPL)
+$(INSTALL_ZH_HTM): $(ENCODED_JS) $(INSTALL_ZH_TPL) $(MOBILE_URL)
 	@echo "generating Chinese installation page: " $@
 	@sed -e 's/$$VERSION/$(VERSION)/' -e 's/$$SCRIPT_URL/$(SCRIPT_URL)/' \
 		 -e 's/$$SALT/$(SALT)/' -e 's/$$ITERATION/$(ITERATION)/' \
 		 -e 's/$$PASS_LEN/$(PASS_LEN)/' -e 's/$$PASS_BASE/$(PASS_BASE)/' \
          -e 's/$$AUTO_SUBMIT/$(AUTO_SUBMIT)/' $(INSTALL_ZH_TPL) \
-		| awk '{if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
+		| awk '{if ($$0 ~ /\$$MOBILE_URL/) {while (getline < "$(MOBILE_URL)") print} else if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
+	@cp $@ $(INSTALL_RES) $(RES_DIR)/* $(DIST_DIR)/
 	@cp $@ $(DIST_DIR)/
 
-$(MOBILE_HTM): $(DIST_MOBILE_JS) $(MOBILE_TPL)
+$(MOBILE_HTM): $(BUILT_MOBILE_JS) $(MOBILE_TPL)
 	@echo "generating mobile page: " $@
 	@sed -e 's/$$VERSION/$(VERSION)/' -e 's/$$APP_HOME_URL/$(APP_HOME_URL)/' \
 		-e 's/$$SALT/$(SALT)/' -e 's/$$PASS_LEN/$(PASS_LEN)/' \
@@ -114,7 +116,11 @@ $(MOBILE_HTM): $(DIST_MOBILE_JS) $(MOBILE_TPL)
 		| awk '{if ($$0 ~ /\$$SCRIPT/) {while (getline < "$<") print} else print}'  > $@
 	@cp $@ $(DIST_DIR)/
 
-$(BOOKMARK_URL): $(DIST_BOOKMARKLET_JS)
+$(MOBILE_URL): $(MOBILE_HTM)
+	@echo "generating mobile url: " $@
+	@perl -MMIME::Base64 -0777 -ne '$$_= encode_base64($$_);s/\s+//g;print "data:text/html;charset=utf-8;base64,$$_"' < $< > $@
+
+$(BOOKMARKLET_URL): $(BUILT_BOOKMARKLET_JS)
 	@echo "generating bookmark url:" $@
 	@echo "javascript:" | cat - $< > $@
 
