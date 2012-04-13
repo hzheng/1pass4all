@@ -1,3 +1,9 @@
+/**
+ * Used in installation page.
+ *
+ * Copyright (c) 2012, Hui Zheng
+ * License: MIT License <http://www.opensource.org/licenses/mit-license.php>
+ */
 
 var passLenSelect = document.getElementById("passLen");
 var passBaseSelect = document.getElementById("passBase");

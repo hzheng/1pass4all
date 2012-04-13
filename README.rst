@@ -93,11 +93,10 @@ Troubleshooting
   Please append the master password with space and a number which specifies
   the length of generated password(DON'T manually truncate the result password).
 
-Disclaimer 
-----------
+Feedback 
+--------
 
-This software is free to use **at your own risk**.
-It has been tested(but not fully) in latest browsers including 
+This software has been tested(but not fully) in latest browsers including 
 Firefox, Chrome, IE, Safari and Opera, and you're welcome to report any bug
 or suggestion to xyzdll [AT] gmail [DOT] com, or leave your comment `here`_.
 
@@ -118,3 +117,11 @@ Reference
 
 .. _`here`:
     http://en.zhenghui.org/2012/02/21/one-pass-for-all-intro/#disqus_thread
+
+License
+-------
+
+Copyright 2012 Hui Zheng
+
+Released under the `MIT License <http://www.opensource.org/licenses/mit-license.php>`_.
+

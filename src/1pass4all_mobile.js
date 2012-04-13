@@ -1,5 +1,8 @@
 /**
  * 1pass4all's mobile version(no installation)
+ *
+ * Copyright (c) 2012, Hui Zheng
+ * License: MIT License <http://www.opensource.org/licenses/mit-license.php>
  */
 
 var onePassForAll_mobile = {

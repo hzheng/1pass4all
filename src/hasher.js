@@ -5,6 +5,9 @@
  * Reference:
  * http://en.wikipedia.org/wiki/SHA-2
  * http://en.wikipedia.org/wiki/HMAC
+ *
+ * Copyright (c) 2012, Hui Zheng
+ * License: MIT License <http://www.opensource.org/licenses/mit-license.php>
  */
 
 // utilities
