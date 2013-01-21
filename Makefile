@@ -1,6 +1,6 @@
 ### APP VARIABLES
 APP = 1pass4all
-VERSION = 0.2.6
+VERSION = 0.2.7
 VERSION_STR = v$(subst .,_,$(VERSION))
 APP_TITLE = $(APP)-$(VERSION_STR)
 BOOKMARKLET_NAME = $(APP).js
@@ -124,7 +124,12 @@ $(BOOKMARKLET_URL): $(BUILT_BOOKMARKLET_JS)
 	@echo "generating bookmark url:" $@
 	@echo "javascript:" | cat - $< > $@
 
+#generate TLD list
+tld:
+	@curl -s http://mxr.mozilla.org/mozilla/source/netwerk/dns/src/effective_tld_names.dat?raw=1 | \
+		awk '/^[^\/|!]/{printf "\"%s\", ", $$1}'
+
 clean:
 	@rm -rf $(BUILD_DIR)/*
 
-.PHONY: clean init
+.PHONY: clean init tld
