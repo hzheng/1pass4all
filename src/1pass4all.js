@@ -292,7 +292,7 @@ var onePassForAll = {
         topBtnStyle: {cssFloat: "right", cursor: "pointer",
             padding: "1px 6px", border: "none", "text-decoration": "none",
             color: "#5B657A", font: "normal 14px tahoma,arial,sans-serif"},
-        advancedDivStyle: {width: "100%", display: "none"},
+        advancedDivStyle: {width: "100%"},
         cmdDivStyle: {width: "80%", margin: "4px auto 0px auto", padding: "0px"},
         genBtnStyle: {width: "48%", cssFloat: "left"},
         clearBtnStyle: {width: "48%", cssFloat: "right"},

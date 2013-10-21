@@ -391,9 +391,11 @@ var passCreator = {
             createElement('span', titleBar, this.settings.title, settings.titleStyle);
             var hideBtn = createElement('a', titleBar, "&times", settings.topBtnStyle);
             hideBtn.onclick = this._hide.bind(this);
+            /*
             var moreBtn = createElement('a', titleBar, "+", settings.topBtnStyle);
             this._moreBtn = moreBtn;
             moreBtn.onclick = this._toggleMore.bind(this);
+            */
             var helpBtn = createElement('a', titleBar, "?", settings.topBtnStyle);
             helpBtn.onclick = function(){window.open(app.homeUrl, '_blank');};
             clearFloat(titleBar);
@@ -464,6 +466,7 @@ var passCreator = {
                 this.isMobile ? null : {readonly: "true"});
     },
 
+    /*
     _toggleMore: function() {
         var e = this._advancedDiv;
         if (e.style.display == "none") {
@@ -474,6 +477,7 @@ var passCreator = {
             this._moreBtn.innerHTML = "+";
         }
     },
+    */
 
     _hide: function() {
         if (this._panel) {
