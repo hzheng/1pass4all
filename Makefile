@@ -129,7 +129,10 @@ tld:
 	@curl -s http://mxr.mozilla.org/mozilla/source/netwerk/dns/src/effective_tld_names.dat?raw=1 | \
 		awk '/^[^\/|!]/{printf "\"%s\", ", $$1}'
 
+sonar:
+	@sonar-runner
+
 clean:
 	@rm -rf $(BUILD_DIR)/*
 
-.PHONY: clean init tld
+.PHONY: clean init tld sonar
